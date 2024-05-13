@@ -1,3 +1,6 @@
+"""
+https://github.com/bclavie/RAGatouille/blob/main/ragatouille/models/colbert.py
+"""
 import time
 import math
 import os
@@ -322,7 +325,7 @@ class ColbertPLAID:
         self.config.root = str(
             Path(self.run_config.root) / Path(self.run_config.experiment) / "indexes"
         )
-        import pdb; pdb.set_trace()
+
         self.pid_docid_map = pid_docid_map
 
         # inverted mapping for returning full docs
