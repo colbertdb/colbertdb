@@ -21,7 +21,7 @@ class Collection:
         cls,
         documents: list[str],
         name: str,
-        store_name: Optional[str] = "dev",
+        store_name: Optional[str] = "default",
         checkpoint: Union[str, Path] = "colbertdb/core/checkpoints/colbertv2.0",
     ):
         """Load a ColBERT model from a pre-trained checkpoint.
@@ -43,16 +43,14 @@ class Collection:
 
     @classmethod
     def load(
-        cls, index_path: Union[str, Path], n_gpu: int = -1
+        cls, name: str, store_name: str, n_gpu: int = -1
     ):
         """Load an Index and the associated ColBERT encoder from an existing document index.
         """
         instance = cls()
-        index_path = Path(index_path)
         instance.model = ColbertPLAID(
-            index_path, n_gpu, load_from_index=True
+            index_name=name, store_name=store_name, n_gpu=n_gpu, load_from_index=True
         )
-
         return instance
 
     def _process_metadata(
@@ -92,7 +90,6 @@ class Collection:
         document_ids: List[str],
         document_metadatas: List[Dict[Any, Any]],
         document_splitter_fn: Optional[Callable[[str], List[str]]],
-        preprocessing_fn: Optional[Callable[[str], str]],
         max_document_length: int,
     ) -> Tuple[List[str], Dict[int, str], Dict[str, Dict[Any, Any]]]:
         """
@@ -105,10 +102,9 @@ class Collection:
             collection_len=len(collection),
         )
 
-        if document_splitter_fn is not None or preprocessing_fn is not None:
+        if document_splitter_fn is not None:
             self.corpus_processor = CorpusProcessor(
                 document_splitter_fn=document_splitter_fn,
-                preprocessing_fn=preprocessing_fn,
             )
             collection_with_ids = self.corpus_processor.process_corpus(
                 collection,
@@ -138,7 +134,6 @@ class Collection:
         max_document_length: int = 256,
         split_documents: bool = True,
         document_splitter_fn: Optional[Callable] = llama_index_sentence_splitter,
-        preprocessing_fn: Optional[Union[Callable, list[Callable]]] = None,
         bsize: int = 32,
         use_faiss: bool = False,
     ):
@@ -165,7 +160,6 @@ class Collection:
             document_ids,
             document_metadatas,
             document_splitter_fn,
-            preprocessing_fn,
             max_document_length,
         )
         return self.model.index(
@@ -187,7 +181,6 @@ class Collection:
         index_name: Optional[str] = None,
         split_documents: bool = True,
         document_splitter_fn: Optional[Callable] = llama_index_sentence_splitter,
-        preprocessing_fn: Optional[Union[Callable, list[Callable]]] = None,
         bsize: int = 32,
         use_faiss: bool = False,
     ):
@@ -211,7 +204,6 @@ class Collection:
             new_document_ids,
             new_document_metadatas,
             document_splitter_fn,
-            preprocessing_fn,
             self.model.config.doc_maxlen,
         )
 

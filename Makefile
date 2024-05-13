@@ -1,2 +1,2 @@
 run-dev:
-	uvicorn colbertdb.server:app --reload
+	uvicorn colbertdb.server.main:app --reload

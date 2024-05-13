@@ -10,7 +10,7 @@ __pycache__/
 .data/
 
 # checkpoint
-checkpoint/*
+**/checkpoints/*
 
 # Distribution / packaging
 .Python

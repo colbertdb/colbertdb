@@ -1,18 +1,38 @@
-"""ColbertDB models."""
+from typing import Optional
 from pydantic import BaseModel
 
 
 class Document(BaseModel):
     """
-    Document model
+    Pydantic model for a document.
     """
-    id: str
+    id: Optional[str] = None
     text: str
-    metadata: dict
+    metadata: Optional[dict] = None
 
-
-class IndexCreate(BaseModel):
+class Collection(BaseModel):
     """
-    Index model
+    Pydantic model for a collection.
+    """
+    documents: list[Document]
+
+
+class CreateCollection(BaseModel):
+    """
+    Pydantic model for creating a collection.
     """
     name: str
+    documents: list[Document]
+    options: Optional[dict] = None
+
+class SearchOptions(BaseModel):
+    """
+    Pydantic model for search options.
+    """
+    top_k: Optional[int] = 10
+
+class SearchCollection(BaseModel):
+    """
+    Pydantic model for searching a collection.
+    """
+    query: str

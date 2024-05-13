@@ -37,7 +37,7 @@ class ColbertPLAID:
         self.loaded_from_index = load_from_index
         n_gpu = 1 if torch.cuda.device_count() == 0 else torch.cuda.device_count()
         self.model_index: Optional[PLAIDModelIndex] = None
-        index_path = f".data/indexes/{index_name}"
+        index_path = f".data/{store_name}/indexes/{index_name}"
 
         if load_from_index:
             self.index_path = index_path
@@ -51,7 +51,7 @@ class ColbertPLAID:
             )
             self.config = self.model_index.config
             self.run_config = RunConfig(
-                nranks=n_gpu, experiment=self.config.experiment, root=self.config.root
+                nranks=n_gpu, root=self.config.root
             )
             split_root = str(self.index_path).split("/")[:-1]
             self.config.root = "/".join(split_root)
