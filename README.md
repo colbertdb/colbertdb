@@ -1,0 +1,2 @@
+# Database built on top of ColBERT, PLAID
+A database built on top of [ColBERT](https://github.com/stanford-futuredata/ColBERT) and [PLAID](https://arxiv.org/abs/2205.09707) and heavily sourced from [RAGatouille](https://github.com/bclavie/RAGatouille/blob/main/ragatouille/models/colbert.py)
