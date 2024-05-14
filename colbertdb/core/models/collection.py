@@ -1,15 +1,22 @@
+""" A module for the Collection class, which represents a collection of indexed and searchable documents."""
+
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, TypeVar, Union
 from uuid import uuid4
 
-from colbertdb.core.utils.documentutils import llama_index_sentence_splitter, CorpusProcessor
+from colbertdb.core.utils.documentutils import (
+    llama_index_sentence_splitter,
+    CorpusProcessor,
+)
 from colbertdb.core.models.colbertplaid import ColbertPLAID
+from colbertdb.core.models.pydantic_models import Document
 
 
 class Collection:
     """
     A class to represent a collection of indexed and searchable documents.
     """
+
     index_name: Union[str, None] = None
     store_name: Union[str, None] = None
     model_name: Union[str, None] = None
@@ -19,11 +26,11 @@ class Collection:
     @classmethod
     def create(
         cls,
-        documents: list[str],
+        collection: List[Document],
         name: str,
         store_name: Optional[str] = "default",
         checkpoint: Union[str, Path] = "colbertdb/core/checkpoints/colbertv2.0",
-    ):
+    ) -> "Collection":
         """Load a ColBERT model from a pre-trained checkpoint.
 
         Parameters:
@@ -33,20 +40,23 @@ class Collection:
             index_root (Optional[str]): The root directory where indexes will be stored. If None, will use the default directory, '.ragatouille/'.
 
         Returns:
-            cls (RAGPretrainedModel): The current instance of RAGPretrainedModel, with the model initialised.
+            cls (Collection): The current instance of Collection, with the model initialised.
         """
         instance = cls()
         instance.model = ColbertPLAID(
-            index_name=name, store_name=store_name, load_from_index=False, checkpoint=checkpoint)
-        instance.index(documents, index_name=name)
+            index_name=name,
+            store_name=store_name,
+            load_from_index=False,
+            checkpoint=checkpoint,
+        )
+        instance.index(collection, index_name=name)
         return instance
 
     @classmethod
     def load(
-        cls, name: str, store_name: str, n_gpu: int = -1
-    ):
-        """Load an Index and the associated ColBERT encoder from an existing document index.
-        """
+        cls, name: str, store_name: str = "default", n_gpu: int = -1
+    ) -> "Collection":
+        """Load an Index and the associated ColBERT encoder from an existing document index."""
         instance = cls()
         instance.model = ColbertPLAID(
             index_name=name, store_name=store_name, n_gpu=n_gpu, load_from_index=True
@@ -55,7 +65,6 @@ class Collection:
 
     def _process_metadata(
         self,
-        document_ids: Optional[Union[TypeVar("T"), List[TypeVar("T")]]],
         document_metadatas: Optional[list[dict[Any, Any]]],
         collection_len: int,
     ) -> tuple[list[str], Optional[dict[Any, Any]]]:
@@ -86,9 +95,7 @@ class Collection:
 
     def _process_corpus(
         self,
-        collection: List[str],
-        document_ids: List[str],
-        document_metadatas: List[Dict[Any, Any]],
+        collection: List[Document],
         document_splitter_fn: Optional[Callable[[str], List[str]]],
         max_document_length: int,
     ) -> Tuple[List[str], Dict[int, str], Dict[str, Dict[Any, Any]]]:
@@ -96,8 +103,8 @@ class Collection:
         Processes a collection of documents by assigning unique IDs, splitting documents if necessary,
         applying preprocessing, and organizing metadata.
         """
+        document_metadatas = [x.metadata for x in collection if x.metadata]
         document_ids, docid_metadata_map = self._process_metadata(
-            document_ids=document_ids,
             document_metadatas=document_metadatas,
             collection_len=len(collection),
         )
@@ -126,9 +133,7 @@ class Collection:
 
     def index(
         self,
-        collection: list[str],
-        document_ids: Union[TypeVar("T"), List[TypeVar("T")]] = None,
-        document_metadatas: Optional[list[dict]] = None,
+        collection: list[Document],
         index_name: str = None,
         overwrite_index: Union[bool, str] = True,
         max_document_length: int = 256,
@@ -157,8 +162,6 @@ class Collection:
             document_splitter_fn = None
         collection, pid_docid_map, docid_metadata_map = self._process_corpus(
             collection,
-            document_ids,
-            document_metadatas,
             document_splitter_fn,
             max_document_length,
         )
@@ -175,21 +178,16 @@ class Collection:
 
     def add_to_index(
         self,
-        new_collection: list[str],
-        new_document_ids: Optional[Union[TypeVar("T"), List[TypeVar("T")]]] = None,
-        new_document_metadatas: Optional[list[dict]] = None,
-        index_name: Optional[str] = None,
+        collection: list[Document],
         split_documents: bool = True,
         document_splitter_fn: Optional[Callable] = llama_index_sentence_splitter,
         bsize: int = 32,
-        use_faiss: bool = False,
     ):
         """Add documents to an existing index.
 
         Parameters:
-            new_collection (list[str]): The documents to add to the index.
+            collection (list[str]): The documents to add to the index.
             new_document_metadatas (Optional[list[dict]]): An optional list of metadata dicts
-            index_name (Optional[str]): The name of the index to add documents to. If None and by default, will add documents to the already initialised one.
             bsize (int): The batch size to use for encoding the passages.
         """
         if not split_documents:
@@ -200,9 +198,7 @@ class Collection:
             new_pid_docid_map,
             new_docid_metadata_map,
         ) = self._process_corpus(
-            new_collection,
-            new_document_ids,
-            new_document_metadatas,
+            collection,
             document_splitter_fn,
             self.model.config.doc_maxlen,
         )
@@ -211,9 +207,7 @@ class Collection:
             new_collection,
             new_pid_docid_map,
             new_docid_metadata_map=new_docid_metadata_map,
-            index_name=index_name,
             bsize=bsize,
-            use_faiss=use_faiss,
         )
 
     def delete_from_index(
@@ -364,5 +358,3 @@ class Collection:
             force (bool): Whether to force the clearing of encoded documents without enforcing a 10s wait time.
         """
         self.model.clear_encoded_docs(force=force)
-
-

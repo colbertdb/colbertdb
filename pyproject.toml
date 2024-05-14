@@ -18,10 +18,12 @@ llama-index-readers-web = "^0.1.13"
 torch = ">=1.13"
 nomkl = "^0.0.3"
 fast-pytorch-kmeans = "0.2.0.1"
+python-jose = "^3.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^3.1.0"
+black = "^24.4.2"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,6 +1,7 @@
 """
 https://github.com/bclavie/RAGatouille/blob/main/ragatouille/models/colbert.py
 """
+
 import time
 import math
 import os
@@ -15,13 +16,14 @@ from colbert.infra import ColBERTConfig, Run, RunConfig
 from colbert.modeling.checkpoint import Checkpoint
 from colbertdb.core.models.index import PLAIDModelIndex
 
+
 class ColbertPLAID:
     def __init__(
         self,
         index_name: Optional[str] = None,
         store_name: Optional[str] = "dev",
         load_from_index: bool = False,
-        checkpoint: Union[str, Path] = 'colbertdb/core/checkpoints/colbertv2.0',
+        checkpoint: Union[str, Path] = "colbertdb/core/checkpoints/colbertv2.0",
         **kwargs,
     ):
         self.collection = None
@@ -35,24 +37,21 @@ class ColbertPLAID:
         self.in_memory_metadatas = None
         self.index_name = index_name
         self.loaded_from_index = load_from_index
+
         n_gpu = 1 if torch.cuda.device_count() == 0 else torch.cuda.device_count()
         self.model_index: Optional[PLAIDModelIndex] = None
         index_path = f".data/{store_name}/indexes/{index_name}"
 
         if load_from_index:
             self.index_path = index_path
-            ckpt_config = ColBERTConfig.load_from_index(
-                str(self.index_path)
-            )
+            ckpt_config = ColBERTConfig.load_from_index(str(self.index_path))
             metadata = srsly.read_json(self.index_path + "/metadata.json")
             index_config = metadata["colbertdb"]["index_config"]
             self.model_index = PLAIDModelIndex.load_from_file(
-               self.index_path, index_name, ckpt_config, index_config
+                self.index_path, index_name, ckpt_config, index_config
             )
             self.config = self.model_index.config
-            self.run_config = RunConfig(
-                nranks=n_gpu, root=self.config.root
-            )
+            self.run_config = RunConfig(nranks=n_gpu, root=self.config.root)
             split_root = str(self.index_path).split("/")[:-1]
             self.config.root = "/".join(split_root)
             self.index_root = self.config.root
@@ -61,13 +60,13 @@ class ColbertPLAID:
             self._get_collection_files_from_disk(self.index_path)
         else:
             self.index_root = ".data/"
-            ckpt_config = ColBERTConfig.load_from_checkpoint(
-                str(checkpoint)
-            )
+            ckpt_config = ColBERTConfig.load_from_checkpoint(str(checkpoint))
             self.run_config = RunConfig(
                 nranks=n_gpu, experiment=store_name, root=self.index_root
             )
-            local_config = ColBERTConfig(collection=None, queries=None, index_name=index_name)
+            local_config = ColBERTConfig(
+                collection=None, queries=None, index_name=index_name
+            )
             self.config = ColBERTConfig.from_existing(
                 ckpt_config,
                 local_config,
@@ -78,8 +77,8 @@ class ColbertPLAID:
             self.config.root = self.index_root
 
         self.inference_ckpt = Checkpoint(
-                name=self.checkpoint, colbert_config=self.config
-            )
+            name=self.checkpoint, colbert_config=self.config
+        )
 
         self.base_model_max_tokens = (
             self.inference_ckpt.bert.config.max_position_embeddings
@@ -87,7 +86,6 @@ class ColbertPLAID:
         self.run_context = Run().context(self.run_config)
         self.run_context.__enter__()  # Manually enter the context
         self.searcher = None
-
 
     def _invert_pid_docid_map(self) -> Dict[str, List[int]]:
         d = defaultdict(list)
@@ -383,10 +381,6 @@ class ColbertPLAID:
                 )
                 return None
 
-        # TODO We may want to load an existing index here instead;
-        #      For now require that either index() was called, or an existing one was loaded.
-        assert self.model_index is not None
-
         results = self.model_index.search(
             self.config,
             self.checkpoint,
@@ -401,6 +395,7 @@ class ColbertPLAID:
         )
 
         to_return = []
+
         for result in results:
             result_for_query = []
             for id_, rank, score in zip(*result):
@@ -416,7 +411,7 @@ class ColbertPLAID:
                 if self.docid_metadata_map is not None:
                     if document_id in self.docid_metadata_map:
                         doc_metadata = self.docid_metadata_map[document_id]
-                        result_dict["document_metadata"] = doc_metadata
+                        result_dict["metadata"] = doc_metadata
 
                 result_for_query.append(result_dict)
 
@@ -433,7 +428,6 @@ class ColbertPLAID:
     def _batch_search(self, query: list[str], k: int):
         assert self.model_index is not None
         return self.model_index._batch_search(query, k)
-
 
     def _colbert_score(self, Q, D_padded, D_mask):
         if ColBERTConfig().total_visible_gpus > 0:

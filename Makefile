@@ -1,2 +1,2 @@
 run-dev:
-	uvicorn colbertdb.server.main:app --reload
+	export NO_AUTH=true && uvicorn colbertdb.server.main:app --reload

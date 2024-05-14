@@ -1,7 +1,7 @@
-
 """
 https://github.com/bclavie/RAGatouille/blob/main/ragatouille/models/index.py
 """
+
 from pathlib import Path
 from typing import Any, List, Optional, TypeVar, Union
 
@@ -17,9 +17,12 @@ class PLAIDModelIndex:
     """
     A class to represent a PLAIDModelIndex.
     """
+
     _DEFAULT_INDEX_BSIZE = 32
     index_type = "PLAID"
-    pytorch_kmeans = staticmethod(torch_kmeans._train_kmeans) #pylint: disable=protected-access
+    pytorch_kmeans = staticmethod(
+        torch_kmeans._train_kmeans
+    )  # pylint: disable=protected-access
 
     def __init__(self, config: ColBERTConfig) -> None:
         self.config = config
@@ -27,14 +30,14 @@ class PLAIDModelIndex:
 
     @staticmethod
     def construct(
-            config: ColBERTConfig,
-            checkpoint: Union[str, Path],
-            collection: List[str],
-            index_name: Optional["str"] = None,
-            overwrite: Union[bool, str] = "reuse",
-            verbose: bool = True,
-            **kwargs,
-        ) -> "PLAIDModelIndex":
+        config: ColBERTConfig,
+        checkpoint: Union[str, Path],
+        collection: List[str],
+        index_name: Optional["str"] = None,
+        overwrite: Union[bool, str] = "reuse",
+        verbose: bool = True,
+        **kwargs,
+    ) -> "PLAIDModelIndex":
         """
         Constructs a PLAIDModelIndex object.
 
@@ -56,12 +59,12 @@ class PLAIDModelIndex:
 
     @staticmethod
     def load_from_file(
-            index_path: Union[str, Path],
-            index_name: Optional[str],
-            index_config: dict[str, Any],
-            config: ColBERTConfig,
-            verbose: bool = True,
-        ) -> "PLAIDModelIndex":
+        index_path: Union[str, Path],
+        index_name: Optional[str],
+        index_config: dict[str, Any],
+        config: ColBERTConfig,
+        verbose: bool = True,
+    ) -> "PLAIDModelIndex":
         """
         Load a PLAIDModelIndex from a file.
 
@@ -114,6 +117,7 @@ class PLAIDModelIndex:
             nbits = 8
         elif len(collection) < 10000:
             nbits = 4
+
         self.config = ColBERTConfig.from_existing(
             self.config, ColBERTConfig(nbits=nbits, index_bsize=bsize)
         )
@@ -128,7 +132,9 @@ class PLAIDModelIndex:
         else:
             self.config.kmeans_niters = 20
 
-        CollectionIndexer._train_kmeans = self.pytorch_kmeans # pylint: disable=protected-access
+        CollectionIndexer._train_kmeans = (
+            self.pytorch_kmeans
+        )  # pylint: disable=protected-access
 
         indexer = Indexer(
             checkpoint=checkpoint,
@@ -136,9 +142,7 @@ class PLAIDModelIndex:
             verbose=verbose,
         )
         indexer.configure(avoid_fork_if_possible=True)
-        indexer.index(
-            name=index_name, collection=collection, overwrite=overwrite
-        )
+        indexer.index(name=index_name, collection=collection, overwrite=overwrite)
 
         return self
 
@@ -201,18 +205,18 @@ class PLAIDModelIndex:
         self.searcher.checkpoint.query_tokenizer.query_maxlen = maxlen
 
     def search(
-            self,
-            config: ColBERTConfig,
-            checkpoint: Union[str, Path],
-            collection: List[str],
-            index_name: Optional[str],
-            base_model_max_tokens: int,
-            query: Union[str, list[str]],
-            k: int = 10,
-            pids: Optional[List[int]] = None,
-            force_reload: bool = False,
-            **kwargs,
-        ) -> list[tuple[list, list, list]]:
+        self,
+        config: ColBERTConfig,
+        checkpoint: Union[str, Path],
+        collection: List[str],
+        index_name: Optional[str],
+        base_model_max_tokens: int,
+        query: Union[str, list[str]],
+        k: int = 10,
+        pids: Optional[List[int]] = None,
+        force_reload: bool = False,
+        **kwargs,
+    ) -> list[tuple[list, list, list]]:
         """
         Perform a search on the index.
 
@@ -287,16 +291,16 @@ class PLAIDModelIndex:
         return current_len + new_doc_len < 5000 or new_doc_len > current_len * 0.05
 
     def add(
-            self,
-            config: ColBERTConfig,
-            checkpoint: Union[str, Path],
-            collection: List[str],
-            index_root: str,
-            index_name: str,
-            new_collection: List[str],
-            verbose: bool = True,
-            **kwargs,
-        ) -> None:
+        self,
+        config: ColBERTConfig,
+        checkpoint: Union[str, Path],
+        collection: List[str],
+        index_root: str,
+        index_name: str,
+        new_collection: List[str],
+        verbose: bool = True,
+        **kwargs,
+    ) -> None:
         """
         Adds new documents to the index.
 
@@ -349,14 +353,14 @@ class PLAIDModelIndex:
             updater.persist_to_disk()
 
     def delete(
-            self,
-            config: ColBERTConfig,
-            checkpoint: Union[str, Path],
-            collection: List[str],
-            index_name: str,
-            pids_to_remove: Union[TypeVar("T"), List[TypeVar("T")]],
-            verbose: bool = True,
-        ) -> None:
+        self,
+        config: ColBERTConfig,
+        checkpoint: Union[str, Path],
+        collection: List[str],
+        index_name: str,
+        pids_to_remove: Union[TypeVar("T"), List[TypeVar("T")]],
+        verbose: bool = True,
+    ) -> None:
         """
         Delete documents from the index.
 
@@ -392,5 +396,3 @@ class PLAIDModelIndex:
         config = self._export_config()
         config["index_type"] = self.index_type
         return config
-
-
