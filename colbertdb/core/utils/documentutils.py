@@ -2,11 +2,13 @@
 https://github.com/bclavie/RAGatouille/blob/main/ragatouille/data/corpus_processor.py
 https://github.com/bclavie/RAGatouille/blob/main/ragatouille/data/preprocessors.py
 """
+
 from typing import Optional, Callable, List
 from uuid import uuid4
 
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core import Document
+
 
 def llama_index_sentence_splitter(
     documents: list[str], document_ids: list[str], chunk_size=256
@@ -37,6 +39,7 @@ class CorpusProcessor:
     """
     Class to process a corpus of documents using a document splitter.
     """
+
     def __init__(
         self,
         document_splitter_fn: Optional[Callable] = SentenceSplitter,

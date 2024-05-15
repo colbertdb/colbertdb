@@ -5,6 +5,7 @@ https://github.com/bclavie/RAGatouille/blob/main/ragatouille/models/colbert.py
 import time
 import math
 import os
+import shutil
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Literal, Optional, TypeVar, Union
@@ -18,13 +19,51 @@ from colbertdb.core.models.index import PLAIDModelIndex
 
 
 class ColbertPLAID:
+    """
+    The ColbertPLAID class represents a PLAID index in the ColbertDB system.
+
+    Args:
+        index_name (Optional[str]): The name of the index. Default is None.
+        store_name (Optional[str]): The name of the store. Default is "dev".
+        load_from_index (bool): Whether to load the index from disk. Default is False.
+        checkpoint (Union[str, Path]): The path to the checkpoint. Default is "colbertdb/core/checkpoints/colbertv2.0".
+
+    Attributes:
+        collection (List[str]): The collection of documents in the index.
+        pid_docid_map (Dict[int, str]): A mapping from document IDs to PLD IDs.
+        docid_pid_map (Dict[str, List[int]]): A mapping from PLD IDs to document IDs.
+        docid_metadata_map (Optional[Dict[str, dict]]): A mapping from document IDs to metadata. Default is None.
+        base_model_max_tokens (int): The maximum number of tokens in the base model.
+        inference_ckpt_len_set (bool): Whether the inference checkpoint length is set. Default is False.
+        in_memory_collection (Optional[List[str]]): The in-memory collection of documents. Default is None.
+        in_memory_metadata (Optional[Dict[str, dict]]): The in-memory metadata of documents. Default is None.
+        in_memory_metadatas (Optional[List[dict]]): The in-memory metadata of documents. Default is None.
+        index_name (Optional[str]): The name of the index.
+        loaded_from_index (bool): Whether the index is loaded from disk.
+        model_index (Optional[PLAIDModelIndex]): The PLAIDModelIndex object representing the index.
+        index_path (Optional[str]): The path to the index.
+        config (ColBERTConfig): The ColBERT configuration.
+        run_config (RunConfig): The run configuration.
+        index_root (str): The root directory of the index.
+        checkpoint (str): The path to the checkpoint.
+        inference_ckpt (Checkpoint): The inference checkpoint.
+        run_context (RunContext): The run context.
+        searcher (Optional[Searcher]): The searcher object.
+
+    Methods:
+        add_to_index(self, new_documents: List[str], new_pid_docid_map: Dict[int, str], new_docid_metadata_map: Optional[List[dict]] = None, index_name: Optional[str] = None, bsize: int = 32): Adds documents to the index.
+        delete_from_index(self, document_ids: Union[TypeVar("T"), List[TypeVar("T")]], index_name: Optional[str] = None): Deletes documents from the index.
+        index(self, collection: List[str], pid_docid_map: Dict[int, str], docid_metadata_map: Optional[dict] = None, index_name: Optional["str"] = None, max_document_length: int = 256, overwrite: Union[bool, str] = "reuse", bsize: int = 32): Indexes the given collection of documents.
+        search(self, query: Union[str, list[str]], index_name: Optional[str] = None, k: int = 10, force_fast: bool = False, zero_index_ranks: bool = False, doc_ids: Optional[List[str]] = None): Perform a search query on the index.
+        delete(self): Deletes the index.
+    """
+
     def __init__(
         self,
         index_name: Optional[str] = None,
         store_name: Optional[str] = "dev",
         load_from_index: bool = False,
         checkpoint: Union[str, Path] = "colbertdb/core/checkpoints/colbertv2.0",
-        **kwargs,
     ):
         self.collection = None
         self.pid_docid_map = None
@@ -41,15 +80,19 @@ class ColbertPLAID:
         n_gpu = 1 if torch.cuda.device_count() == 0 else torch.cuda.device_count()
         self.model_index: Optional[PLAIDModelIndex] = None
         index_path = f".data/{store_name}/indexes/{index_name}"
-
         if load_from_index:
             self.index_path = index_path
             ckpt_config = ColBERTConfig.load_from_index(str(self.index_path))
             metadata = srsly.read_json(self.index_path + "/metadata.json")
             index_config = metadata["colbertdb"]["index_config"]
+
             self.model_index = PLAIDModelIndex.load_from_file(
-                self.index_path, index_name, ckpt_config, index_config
+                index_path=self.index_path,
+                index_name=index_name,
+                config=ckpt_config,
+                index_config=index_config,
             )
+
             self.config = self.model_index.config
             self.run_config = RunConfig(nranks=n_gpu, root=self.config.root)
             split_root = str(self.index_path).split("/")[:-1]
@@ -58,6 +101,7 @@ class ColbertPLAID:
             self.checkpoint = self.config.checkpoint
             self.index_name = self.config.index_name
             self._get_collection_files_from_disk(self.index_path)
+
         else:
             self.index_root = ".data/"
             ckpt_config = ColBERTConfig.load_from_checkpoint(str(checkpoint))
@@ -88,22 +132,38 @@ class ColbertPLAID:
         self.searcher = None
 
     def _invert_pid_docid_map(self) -> Dict[str, List[int]]:
+        """
+        Inverts the pid_docid_map.
+
+        Returns:
+            Dict[str, List[int]]: The inverted pid_docid_map.
+        """
         d = defaultdict(list)
         for k, v in self.pid_docid_map.items():
             d[v].append(k)
         return d
 
     def _get_collection_files_from_disk(self, index_path: str):
-        self.collection = srsly.read_json(index_path / "collection.json")
-        if os.path.exists(str(index_path / "docid_metadata_map.json")):
+        """
+        Loads the collection files from disk.
+
+        Args:
+            index_path (str): The path to the index.
+
+        Returns:
+            None
+        """
+        self.collection = srsly.read_json(Path(index_path, "collection.json"))
+        if os.path.exists(str(Path(index_path, "docid_metadata_map.json"))):
             self.docid_metadata_map = srsly.read_json(
-                str(index_path / "docid_metadata_map.json")
+                str(Path(index_path, "docid_metadata_map.json"))
             )
         else:
             self.docid_metadata_map = None
-
         try:
-            self.pid_docid_map = srsly.read_json(str(index_path / "pid_docid_map.json"))
+            self.pid_docid_map = srsly.read_json(
+                str(Path(index_path, "pid_docid_map.json"))
+            )
         except FileNotFoundError as err:
             raise FileNotFoundError(
                 "ERROR: Could not load pid_docid_map from index!",
@@ -123,21 +183,21 @@ class ColbertPLAID:
         new_docid_metadata_map: Optional[List[dict]] = None,
         index_name: Optional[str] = None,
         bsize: int = 32,
-        use_faiss: bool = False,
     ):
+        """
+        Adds documents to the index.
+
+        Args:
+            new_documents (List[str]): The new documents to be added.
+            new_pid_docid_map (Dict[int, str]): The mapping from PLD IDs to document IDs for the new documents.
+            new_docid_metadata_map (Optional[List[dict]]): The metadata for the new documents. Default is None.
+            index_name (Optional[str]): The name of the index. If not provided, the current index name will be used.
+            bsize (int): The batch size for indexing. Default is 32.
+
+        Returns:
+            None
+        """
         self.index_name = index_name if index_name is not None else self.index_name
-        if self.index_name is None:
-            print(
-                "Cannot add to index without an index_name! Please provide one.",
-                "Returning empty results.",
-            )
-            return None
-
-        print(
-            "WARNING: add_to_index support is currently experimental!",
-            "add_to_index support will be more thorough in future versions",
-        )
-
         if self.loaded_from_index:
             index_root = self.config.root
         else:
@@ -166,11 +226,6 @@ class ColbertPLAID:
 
         new_collection = [doc["content"] for doc in new_documents_with_ids]
 
-        # TODO We may want to load an existing index here instead;
-        #      For now require that either index() was called, or an existing one was loaded.
-        assert self.model_index is not None
-
-        # TODO We probably want to store some of this in the model_index directly.
         self.model_index.add(
             self.config,
             self.checkpoint,
@@ -180,7 +235,6 @@ class ColbertPLAID:
             new_collection,
             verbose=1,
             bsize=bsize,
-            use_faiss=use_faiss,
         )
         self.config = self.model_index.config
 
@@ -207,9 +261,26 @@ class ColbertPLAID:
 
     def delete_from_index(
         self,
-        document_ids: Union[TypeVar("T"), List[TypeVar("T")]],
+        document_ids: Union[TypeVar("T"), List[TypeVar("T")]],  # type: ignore
         index_name: Optional[str] = None,
     ):
+        """
+        Deletes documents from the index.
+
+        Args:
+            document_ids (Union[TypeVar("T"), List[TypeVar("T")]]): The IDs of the documents to be deleted.
+            index_name (Optional[str]): The name of the index to delete from. If not provided, the default index name will be used.
+
+        Returns:
+            None
+
+        Raises:
+            AssertionError: If the model index is not loaded.
+
+        Notes:
+            - This method is currently experimental and may have limited functionality.
+            - The index metadata and collection will be updated and serialized after the deletion.
+        """
         self.index_name = index_name if index_name is not None else self.index_name
         if self.index_name is None:
             print(
@@ -228,11 +299,6 @@ class ColbertPLAID:
             if docid in document_ids:
                 pids_to_remove.append(pid)
 
-        # TODO We may want to load an existing index here instead;
-        #      For now require that either index() was called, or an existing one was loaded.
-        assert self.model_index is not None
-
-        # TODO We probably want to store some of this in the model_index directly.
         self.model_index.delete(
             self.config,
             self.checkpoint,
@@ -264,6 +330,12 @@ class ColbertPLAID:
         print(f"Successfully deleted documents with these IDs: {document_ids}")
 
     def _write_collection_files_to_disk(self):
+        """
+        Writes the collection files to disk.
+
+        Returns:
+            None
+        """
         srsly.write_json(self.index_path + "/collection.json", self.collection)
         srsly.write_json(self.index_path + "/pid_docid_map.json", self.pid_docid_map)
         if self.docid_metadata_map is not None:
@@ -273,6 +345,14 @@ class ColbertPLAID:
 
         # update the in-memory inverted map every time the files are saved to disk
         self.docid_pid_map = self._invert_pid_docid_map()
+
+    def delete(self):
+        print("Deleting index...")
+        self._delete_from_disk()
+
+    def _delete_from_disk(self):
+        print(self.index_path)
+        shutil.rmtree(self.index_path, ignore_errors=True)
 
     def _save_index_metadata(self):
         assert self.model_index is not None
@@ -294,8 +374,22 @@ class ColbertPLAID:
         max_document_length: int = 256,
         overwrite: Union[bool, str] = "reuse",
         bsize: int = 32,
-        use_faiss: bool = False,
     ):
+        """
+        Indexes the given collection of documents.
+
+        Args:
+            collection (List[str]): A list of documents to be indexed.
+            pid_docid_map (Dict[int, str]): A mapping of document IDs to document IDs in the collection.
+            docid_metadata_map (Optional[dict], optional): A mapping of document IDs to metadata. Defaults to None.
+            index_name (Optional[str], optional): The name of the index. If not provided, a default name will be used. Defaults to None.
+            max_document_length (int, optional): The maximum length of a document. Defaults to 256.
+            overwrite (Union[bool, str], optional): Specifies whether to overwrite an existing index or reuse it. Defaults to "reuse".
+            bsize (int, optional): The batch size for indexing. Defaults to 32.
+
+        Returns:
+            str: The path to the index.
+        """
         self.collection = collection
         self.config.doc_maxlen = max_document_length
 
@@ -341,7 +435,6 @@ class ColbertPLAID:
             overwrite,
             verbose=1,
             bsize=bsize,
-            use_faiss=use_faiss,
         )
         self.config = self.model_index.config
         self._save_index_metadata()
@@ -353,12 +446,26 @@ class ColbertPLAID:
     def search(
         self,
         query: Union[str, list[str]],
-        index_name: Optional["str"] = None,
+        index_name: Optional[str] = None,
         k: int = 10,
         force_fast: bool = False,
         zero_index_ranks: bool = False,
         doc_ids: Optional[List[str]] = None,
     ):
+        """
+        Perform a search query on the index.
+
+        Args:
+            query (Union[str, list[str]]): The search query string or a list of query strings.
+            index_name (Optional[str]): The name of the index to search in. If not provided, the current index name will be used.
+            k (int): The number of search results to retrieve. Defaults to 10.
+            force_fast (bool): Whether to force fast search. Defaults to False.
+            zero_index_ranks (bool): Whether to use zero-indexed ranks in the search results. Defaults to False.
+            doc_ids (Optional[List[str]]): A list of document IDs to restrict the search to. Defaults to None.
+
+        Returns:
+            Union[List[List[Dict[str, Any]]], List[Dict[str, Any]], None]: The search results. If only one query string is provided, a list of dictionaries is returned. If multiple query strings are provided, a list of lists of dictionaries is returned. If no results are found, None is returned.
+        """
         pids = None
         if doc_ids is not None:
             pids = []

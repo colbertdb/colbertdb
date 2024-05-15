@@ -53,13 +53,12 @@ class Collection:
         return instance
 
     @classmethod
-    def load(
-        cls, name: str, store_name: str = "default", n_gpu: int = -1
-    ) -> "Collection":
+    def load(cls, name: str, store_name: str = "default") -> "Collection":
         """Load an Index and the associated ColBERT encoder from an existing document index."""
+        print(f"Loading index {name} from store {store_name}...")
         instance = cls()
         instance.model = ColbertPLAID(
-            index_name=name, store_name=store_name, n_gpu=n_gpu, load_from_index=True
+            index_name=name, store_name=store_name, load_from_index=True
         )
         return instance
 
@@ -140,7 +139,6 @@ class Collection:
         split_documents: bool = True,
         document_splitter_fn: Optional[Callable] = llama_index_sentence_splitter,
         bsize: int = 32,
-        use_faiss: bool = False,
     ):
         """Build an index from a list of documents.
 
@@ -173,7 +171,6 @@ class Collection:
             max_document_length=max_document_length,
             overwrite=overwrite_index,
             bsize=bsize,
-            use_faiss=use_faiss,
         )
 
     def add_to_index(
@@ -225,6 +222,10 @@ class Collection:
             document_ids,
             index_name=index_name,
         )
+
+    def delete(self):
+        """Delete the index and the associated ColBERT encoder."""
+        self.model.delete()
 
     def search(
         self,

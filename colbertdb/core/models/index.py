@@ -53,6 +53,7 @@ class PLAIDModelIndex:
         Returns:
             PLAIDModelIndex: The constructed PLAIDModelIndex object.
         """
+        []
         return PLAIDModelIndex(config).build(
             checkpoint, collection, index_name, overwrite, verbose, **kwargs
         )
