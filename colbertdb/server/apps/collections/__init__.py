@@ -13,10 +13,8 @@ collections_app = FastAPI(openapi_prefix="/collections")
 def authenticate_request(request: Request, call_next):
     """Authenticate the request."""
     if os.getenv("AUTH_MODE", "no_auth") == "no_auth":
-        print("NO AUTH")
         return call_next(request)
     # Check the token
-    print("AUTH")
     jwt_token = request.headers.get("Authorization")
     verify_token(jwt_token)
     return call_next(request)

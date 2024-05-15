@@ -1,3 +1,6 @@
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-module-docstring
+# pylint: disable=redefined-outer-name
 from unittest.mock import patch, Mock
 
 import pytest
@@ -77,8 +80,7 @@ def test_add_documents(mock_load, mock_collection):
 
 
 @patch("colbertdb.core.models.collection.Collection.load")
-@patch("colbertdb.core.models.collection.Collection.search")
-def test_search_collection(mock_search, mock_load, mock_collection):
+def test_search_collection(mock_load, mock_collection):
     mock_collection.search.return_value = search_response
     mock_load.return_value = mock_collection
     response = client.post(

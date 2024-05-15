@@ -10,9 +10,8 @@ app = FastAPI()
 app.mount("/client", client_app)
 app.mount("/collections", collections_app)
 
-app.get("/health")
 
-
+@app.get("/health")
 def health():
     """
     Health check endpoint.

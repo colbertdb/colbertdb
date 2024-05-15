@@ -1,6 +1,7 @@
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-module-docstring
 import os
 from fastapi.testclient import TestClient
-from unittest.mock import patch
 from colbertdb.server.main import app
 
 client = TestClient(app)

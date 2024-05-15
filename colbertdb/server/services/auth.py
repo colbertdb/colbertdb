@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
@@ -10,9 +9,6 @@ from colbertdb.server.stores.api_keys import CLIENT_API_KEY
 SECRET_KEY = "secret"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
-# Auth mode
-AUTH_MODE = os.getenv("AUTH_MODE", "no_auth")
 
 
 def create_access_token(data: dict):
