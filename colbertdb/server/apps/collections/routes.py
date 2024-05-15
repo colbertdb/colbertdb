@@ -9,6 +9,7 @@ from colbertdb.server.apps.collections.models import (
     SearchResponse,
     AddToCollectionRequest,
     OperationResponse,
+    DeleteDocumentsRequest,
 )
 
 
@@ -78,6 +79,7 @@ def search_collection(
     try:
         collection = Collection.load(name=collection_name)
         docs = collection.search(query=request.query, k=request.k)
+        print(docs)
         return SearchResponse(documents=docs)
     except Exception as e:
         print(e)
@@ -97,6 +99,26 @@ def delete_collection(collection_name: str):
     try:
         collection = Collection.load(name=collection_name)
         collection.delete()
+        return OperationResponse(
+            status="success", message="Collection deleted successfully."
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@collections_router.post("/{collection_name}/delete", response_model=OperationResponse)
+def delete_documents(collection_name: str, request: DeleteDocumentsRequest):
+    """Delete a collection in the specified store.
+
+    Args:
+        collection_name (str): The name of the collection.
+
+    Returns:
+        str: Status of the operation.
+    """
+    try:
+        collection = Collection.load(name=collection_name)
+        collection.delete_from_index(document_ids=request.document_ids)
         return OperationResponse(
             status="success", message="Collection deleted successfully."
         )

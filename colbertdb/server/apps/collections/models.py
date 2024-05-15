@@ -72,20 +72,4 @@ class DeleteDocumentsRequest(BaseModel):
     Pydantic model for deleting documents.
     """
 
-    ids: List[str]
-
-
-class ConnectResponse(BaseModel):
-    """
-    Pydantic model for a token.
-    """
-
-    access_token: str
-
-
-class ConnectRequest(BaseModel):
-    """
-    Pydantic model for a connect request.
-    """
-
-    api_token: str
+    document_ids: List[str]

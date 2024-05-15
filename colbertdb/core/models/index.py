@@ -133,9 +133,7 @@ class PLAIDModelIndex:
         else:
             self.config.kmeans_niters = 20
 
-        CollectionIndexer._train_kmeans = (
-            self.pytorch_kmeans
-        )  # pylint: disable=protected-access
+        CollectionIndexer._train_kmeans = self.pytorch_kmeans
 
         indexer = Indexer(
             checkpoint=checkpoint,

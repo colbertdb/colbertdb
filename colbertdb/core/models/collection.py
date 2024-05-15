@@ -83,7 +83,6 @@ class Collection:
                 raise ValueError("All document_ids must be of the same type")
 
         if document_metadatas is not None:
-            print(document_metadatas)
             if len(document_metadatas) != collection_len:
                 raise ValueError(
                     "document_metadatas must be the same length as collection"
@@ -106,8 +105,12 @@ class Collection:
         Processes a collection of documents by assigning unique IDs, splitting documents if necessary,
         applying preprocessing, and organizing metadata.
         """
-        document_metadatas = [x.metadata for x in collection]
-        document_corpus = [x.text for x in collection]
+        document_metadatas = [
+            x.metadata if x.metadata is not None else {} for x in collection
+        ]
+
+        document_corpus = [x.content for x in collection]
+
         document_ids, docid_metadata_map = self._process_metadata(
             document_metadatas=document_metadatas,
             collection_len=len(collection),
@@ -134,7 +137,6 @@ class Collection:
         }
 
         collection = [x["content"] for x in collection_with_ids]
-
         return collection, pid_docid_map, docid_metadata_map
 
     def index(
