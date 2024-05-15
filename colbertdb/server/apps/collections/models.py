@@ -11,7 +11,7 @@ class CreateCollectionDocument(BaseModel):
     Pydantic model for creating a collection.
     """
 
-    text: str
+    content: str
     metadata: Optional[dict] = None
 
 
@@ -63,6 +63,7 @@ class SearchCollectionRequest(BaseModel):
     Pydantic model for searching a collection.
     """
 
+    k: Optional[int] = None
     query: str
 
 

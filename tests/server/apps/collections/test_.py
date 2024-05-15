@@ -10,17 +10,17 @@ from colbertdb.server.main import app
 client = TestClient(app)
 
 documents = [
-    {"text": f"This is doc{i}", "metadata": {"external_id": i}} for i in range(10)
+    {"content": f"This is doc{i}", "metadata": {"external_id": i}} for i in range(10)
 ]
 
 search_response = [
     {
         "document_id": str(i),
-        "text": f"This is doc{i}",
+        "content": f"This is doc{i}",
         "metadata": {"external_id": i},
         "score": 0.5,
         "rank": 1,
-        "passage_id": f"passage_id_{i}",
+        "passage_id": i,
     }
     for i in range(4)
 ]

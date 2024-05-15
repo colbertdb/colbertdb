@@ -77,9 +77,10 @@ def search_collection(
     """
     try:
         collection = Collection.load(name=collection_name)
-        docs = collection.search(query=request.query)
+        docs = collection.search(query=request.query, k=request.k)
         return SearchResponse(documents=docs)
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
