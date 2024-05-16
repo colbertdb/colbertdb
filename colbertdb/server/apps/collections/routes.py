@@ -3,6 +3,7 @@
 from fastapi import APIRouter, HTTPException
 
 from colbertdb.core.models.collection import Collection
+from colbertdb.core.models.store import Store
 from colbertdb.server.apps.collections.models import (
     CreateCollectionRequest,
     SearchCollectionRequest,
@@ -10,10 +11,40 @@ from colbertdb.server.apps.collections.models import (
     AddToCollectionRequest,
     OperationResponse,
     DeleteDocumentsRequest,
+    ListCollectionsResponse,
+    GetCollectionResponse,
 )
 
 
 collections_router = APIRouter()
+
+
+@collections_router.get("/", response_model=ListCollectionsResponse)
+def get_collections():
+    """Get all collections in the specified store.
+
+    Returns:
+        str: Status of the operation.
+    """
+    try:
+        collections = Store().list_collections()
+        return ListCollectionsResponse(collections=collections)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@collections_router.get("/{collection_name}", response_model=GetCollectionResponse)
+def get_collection(collection_name: str):
+    """Get all collections in the specified store.
+
+    Returns:
+        str: Status of the operation.
+    """
+    try:
+        exists = Store().collection_exists(collection_name=collection_name)
+        return GetCollectionResponse(exists=exists)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @collections_router.post("/", response_model=OperationResponse)

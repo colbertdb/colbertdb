@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request
 from colbertdb.server.apps.collections.routes import collections_router
 from colbertdb.server.services.auth import verify_token
 
-collections_app = FastAPI(openapi_prefix="/collections")
+collections_app = FastAPI(root_path="/collections")
 
 
 @collections_app.middleware("http")

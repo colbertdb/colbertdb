@@ -4,5 +4,5 @@ from fastapi import FastAPI
 
 from colbertdb.server.apps.client.routes import client_router
 
-client_app = FastAPI(openapi_prefix="/client")
+client_app = FastAPI(root_path="/client")
 client_app.include_router(client_router)

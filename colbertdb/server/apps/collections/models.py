@@ -15,6 +15,22 @@ class CreateCollectionDocument(BaseModel):
     metadata: Optional[dict] = None
 
 
+class ListCollectionsResponse(BaseModel):
+    """
+    Pydantic model for the response of listing collections.
+    """
+
+    collections: List[str]
+
+
+class GetCollectionResponse(BaseModel):
+    """
+    Pydantic model for the response of getting a collection.
+    """
+
+    exists: bool
+
+
 class OperationResponse(BaseModel):
     """
     Pydantic model for the response of an operation.

@@ -17,8 +17,8 @@ async def connect(request: ConnectRequest):
         access_token = create_access_token(data={"api_key": "no_auth"})
         return {"access_token": access_token}
 
-    if request.api_token == CLIENT_API_KEY:
-        access_token = create_access_token(data={"api_key": request.api_token})
+    if request.api_key == CLIENT_API_KEY:
+        access_token = create_access_token(data={"api_key": request.api_key})
         return {"access_token": access_token}
 
     raise HTTPException(

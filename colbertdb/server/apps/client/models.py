@@ -16,4 +16,4 @@ class ConnectRequest(BaseModel):
     Pydantic model for a connect request.
     """
 
-    api_token: str
+    api_key: str
