@@ -110,7 +110,6 @@ def search_collection(
     try:
         collection = Collection.load(name=collection_name)
         docs = collection.search(query=request.query, k=request.k)
-        print(docs)
         return SearchResponse(documents=docs)
     except Exception as e:
         print(e)
