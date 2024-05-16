@@ -26,7 +26,7 @@ class ColbertPLAID:
         index_name (Optional[str]): The name of the index. Default is None.
         store_name (Optional[str]): The name of the store. Default is "dev".
         load_from_index (bool): Whether to load the index from disk. Default is False.
-        checkpoint (Union[str, Path]): The path to the checkpoint. Default is "colbertdb/core/checkpoints/colbertv2.0".
+        checkpoint (Union[str, Path]): The path to the checkpoint. Default is ".checkpoints/colbertv2.0".
 
     Attributes:
         collection (List[str]): The collection of documents in the index.
@@ -63,7 +63,7 @@ class ColbertPLAID:
         index_name: Optional[str] = None,
         store_name: Optional[str] = "dev",
         load_from_index: bool = False,
-        checkpoint: Union[str, Path] = "colbertdb/core/checkpoints/colbertv2.0",
+        checkpoint: Union[str, Path] = ".checkpoints/colbertv2.0",
     ):
         self.collection = None
         self.pid_docid_map = None
