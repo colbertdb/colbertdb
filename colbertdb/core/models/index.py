@@ -10,7 +10,7 @@ from colbert import Indexer, IndexUpdater, Searcher
 from colbert.indexing.collection_indexer import CollectionIndexer
 from colbert.infra import ColBERTConfig
 
-from colbertdb.lib import torch_kmeans
+from colbertdb.core.utils import torch_kmeans
 
 
 class PLAIDModelIndex:
