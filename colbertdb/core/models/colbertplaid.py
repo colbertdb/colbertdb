@@ -394,18 +394,8 @@ class ColbertPLAID:
         self.config.doc_maxlen = max_document_length
 
         if index_name is not None:
-            if self.index_name is not None:
-                print(
-                    f"New index_name received!",
-                    f"Updating current index_name ({self.index_name}) to {index_name}",
-                )
             self.index_name = index_name
         else:
-            if self.index_name is None:
-                print(
-                    f"No index_name received!",
-                    f"Using default index_name ({self.checkpoint}_new_index)",
-                )
             self.index_name = self.checkpoint + "new_index"
 
         self.index_path = str(

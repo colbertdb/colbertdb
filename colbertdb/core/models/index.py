@@ -133,14 +133,16 @@ class PLAIDModelIndex:
         else:
             self.config.kmeans_niters = 20
 
+        print("Using pytorch kmeans for clustering")
         CollectionIndexer._train_kmeans = self.pytorch_kmeans
-
         indexer = Indexer(
             checkpoint=checkpoint,
             config=self.config,
             verbose=verbose,
         )
+        print("Configuring the index...")
         indexer.configure(avoid_fork_if_possible=True)
+        print("Indexing")
         indexer.index(name=index_name, collection=collection, overwrite=overwrite)
 
         return self
