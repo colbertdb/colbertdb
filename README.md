@@ -18,195 +18,30 @@ The motivation behind ColBERTdb is three-fold:
 - python client [pycoldbertdb](https://github.com/colbertdb/pycolbertdb.git)
 
 
-## Getting Started
-
+## Run
+From docker hub
+```yaml
+services:
+  colbertdb:
+    image: rsloanweave/colbertdb:latest
+    container_name: colbertdb
+    ports:
+      - "8080:8080"
+    environment:
+      - AUTH_MODE=no_auth
+    entrypoint: ["/bin/sh", "-c", "mkdir -p /src/.data && uvicorn colbertdb.server.main:app --host 0.0.0.0 --port 8080 --reload"]
+    volumes:
+      - ./.data:/src/.data
 ```
+From source
+```bash
 git clone https://github.com/colbertdb/colbertdb.git
 cd colbertdb
 docker compose up --build
 ```
 
-## ColBERTdb API Documentation
-
-### COLLECTIONS
-
-**Title:** FastAPI
-**Version:** 0.1.0
-**Base URL:** `/collections`
-
-#### Get Collections
-
-**Endpoint:** `GET /`
-**Summary:** Get all collections in the specified store.
-**Responses:**
-- **200:** Successful Response (ListCollectionsResponse)
-
-#### Create Collection
-
-**Endpoint:** `POST /`
-**Summary:** Create a collection in the specified store.
-**Request Body:**
-- **Content-Type:** application/json
-- **Schema:** CreateCollectionRequest
-**Responses:**
-- **200:** Successful Response (OperationResponse)
-- **422:** Validation Error (HTTPValidationError)
-
-#### Get Collection
-
-**Endpoint:** `GET /{collection_name}`
-**Summary:** Get details of a specific collection.
-**Parameters:**
-- **collection_name** (path): string
-**Responses:**
-- **200:** Successful Response (GetCollectionResponse)
-- **422:** Validation Error (HTTPValidationError)
-
-#### Delete Collection
-
-**Endpoint:** `DELETE /{collection_name}`
-**Summary:** Delete a specific collection.
-**Parameters:**
-- **collection_name** (path): string
-**Responses:**
-- **200:** Successful Response (OperationResponse)
-- **422:** Validation Error (HTTPValidationError)
-
-#### Add Documents
-
-**Endpoint:** `POST /{collection_name}/documents`
-**Summary:** Add documents to a specific collection.
-**Parameters:**
-- **collection_name** (path): string
-**Request Body:**
-- **Content-Type:** application/json
-- **Schema:** AddToCollectionRequest
-**Responses:**
-- **200:** Successful Response (OperationResponse)
-- **422:** Validation Error (HTTPValidationError)
-
-#### Search Collection
-
-**Endpoint:** `POST /{collection_name}/search`
-**Summary:** Search a specific collection.
-**Parameters:**
-- **collection_name** (path): string
-**Request Body:**
-- **Content-Type:** application/json
-- **Schema:** SearchCollectionRequest
-**Responses:**
-- **200:** Successful Response (SearchResponse)
-- **422:** Validation Error (HTTPValidationError)
-
-#### Delete Documents
-
-**Endpoint:** `POST /{collection_name}/delete`
-**Summary:** Delete documents from a specific collection.
-**Parameters:**
-- **collection_name** (path): string
-**Request Body:**
-- **Content-Type:** application/json
-- **Schema:** DeleteDocumentsRequest
-**Responses:**
-- **200:** Successful Response (OperationResponse)
-- **422:** Validation Error (HTTPValidationError)
-
-### Schemas
-
-#### AddToCollectionRequest
-
-- **documents** (array of CreateCollectionDocument)
-
-#### CreateCollectionDocument
-
-- **content** (string)
-- **metadata** (object, nullable)
-
-#### CreateCollectionRequest
-
-- **name** (string)
-- **documents** (array of CreateCollectionDocument)
-- **options** (object, nullable)
-
-#### DeleteDocumentsRequest
-
-- **document_ids** (array of string)
-
-#### Document
-
-- **content** (string)
-- **document_id** (string, nullable)
-- **score** (number, nullable)
-- **rank** (integer, nullable)
-- **passage_id** (integer, nullable)
-- **metadata** (object)
-
-#### GetCollectionResponse
-
-- **exists** (boolean)
-
-#### HTTPValidationError
-
-- **detail** (array of ValidationError)
-
-#### ListCollectionsResponse
-
-- **collections** (array of string)
-
-#### OperationResponse
-
-- **status** (string)
-- **message** (string)
-
-#### SearchCollectionRequest
-
-- **k** (integer, nullable)
-- **query** (string)
-
-#### SearchResponse
-
-- **documents** (array of Document)
-
-#### ValidationError
-
-- **loc** (array of string or integer)
-- **msg** (string)
-- **type** (string)
-
-
-### CLIENT
-
-**Title:** FastAPI
-**Version:** 0.1.0
-**Base URL:** `/client`
-
-#### Connect
-
-**Endpoint:** `POST /connect`
-**Summary:** Connect to the server.
-**Request Body:**
-- **Content-Type:** application/json
-- **Schema:** ConnectRequest
-**Responses:**
-- **200:** Successful Response (ConnectResponse)
-- **422:** Validation Error (HTTPValidationError)
-
-### Schemas
-
-#### ConnectRequest
-
-- **api_key** (string): The API key for authentication.
-
-#### ConnectResponse
-
-- **access_token** (string): The access token for authentication.
-
-#### HTTPValidationError
-
-- **detail** (array of ValidationError)
-
-#### ValidationError
-
-- **loc** (array of string or integer)
-- **msg** (string)
-- **type** (string)
+## API Docs
+```
+http://localhost:8080/client/docs
+http://localhost:8080/collections/docs
+```
