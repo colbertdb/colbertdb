@@ -5,13 +5,12 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - ENV=dev
+        ENV: dev
     ports:
       - "8080:8080"
-
     environment:
       - AUTH_MODE=no_auth
-    entrypoint: ["uvicorn", "colbertdb.server.main:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]
+    entrypoint: ["/bin/sh", "-c", "mkdir -p /src/.data && uvicorn colbertdb.server.main:app --host 0.0.0.0 --port 8080 --reload"]
     volumes:
       - ./colbertdb:/src/colbertdb
-      - ./.data:/src/.data
+      - ./.data/:/src/.data/

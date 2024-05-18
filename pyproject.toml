@@ -18,7 +18,7 @@ torch = ">=1.13"
 nomkl = "^0.0.3"
 fast-pytorch-kmeans = "0.2.0.1"
 python-jose = "^3.3.0"
-colbert-ai = {git = "https://github.com/rysloan4/ColBERT.git"}
+colbert-ai = {git = "https://github.com/colbertdb/ColBERT.git"}
 
 
 [tool.poetry.group.dev.dependencies]

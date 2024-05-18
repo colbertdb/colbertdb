@@ -135,6 +135,7 @@ class PLAIDModelIndex:
 
         print("Using pytorch kmeans for clustering")
         CollectionIndexer._train_kmeans = self.pytorch_kmeans
+
         indexer = Indexer(
             checkpoint=checkpoint,
             config=self.config,

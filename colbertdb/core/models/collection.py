@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, TypeVar, Union
 from uuid import uuid4
 
+from colbertdb.core.models.store import Store
 from colbertdb.core.utils.documentutils import (
     llama_index_sentence_splitter,
     CorpusProcessor,
@@ -49,6 +50,9 @@ class Collection:
             load_from_index=False,
             checkpoint=checkpoint,
         )
+        store = Store(name=store_name)
+        if not store.exists():
+            store.create()
         instance.index(collection, index_name=name)
         return instance
 
