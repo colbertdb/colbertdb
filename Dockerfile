@@ -27,7 +27,7 @@ RUN mkdir -p .checkpoints && \
     wget -qO- https://downloads.cs.stanford.edu/nlp/data/colbert/colbertv2/colbertv2.0.tar.gz | tar xvz -C .checkpoints
 
 # Copy and run the initialization script
-COPY initialize_data.sh /src/
+COPY entrypoint.sh /src/
 
 # Use Python 3.12 as the base image for the final stage
 FROM python:3.11
@@ -43,7 +43,7 @@ COPY --from=builder /venv /venv
 # Copy the application code and checkpoints from the builder stage
 COPY --from=builder /src/colbertdb /src/colbertdb
 COPY --from=builder /src/.checkpoints /src/.checkpoints
-COPY --from=builder /src/initialize_data.sh /src/initialize_data.sh
+COPY --from=builder /src/entrypoint.sh /src/entrypoint.sh
 
 # Set the working directory
 WORKDIR /src
@@ -54,5 +54,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 
-# Run the initialization script
-RUN chmod +x /src/initialize_data.sh && /src/initialize_data.sh
+# Ensure the entrypoint script is executable
+RUN chmod +x /src/entrypoint.sh
+
+ENTRYPOINT ["/src/entrypoint.sh"]
+

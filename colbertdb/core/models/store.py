@@ -28,7 +28,5 @@ class Store:
     def create(self):
         """Create a store."""
         print(f"Creating store: {self.name}")
-        cwd = os.getcwd()
-        print(cwd)
         store_path = f".data/{self.name}"
         os.makedirs(store_path)

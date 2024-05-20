@@ -27,11 +27,18 @@ services:
     container_name: colbertdb
     ports:
       - "8080:8080"
+    command:
+      - uvicorn
+      - colbertdb.server.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8080'
     environment:
       - AUTH_MODE=no_auth
-    entrypoint: ["/bin/sh", "-c", "mkdir -p /src/.data && uvicorn colbertdb.server.main:app --host 0.0.0.0 --port 8080 --reload"]
     volumes:
-      - ./.data:/src/.data
+      - ./colbertdb:/src/colbertdb
+      - ./.data/:/src/.data/
 ```
 From source
 ```bash
