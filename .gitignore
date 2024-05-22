@@ -12,6 +12,10 @@ __pycache__/
 # checkpoints
 .checkpoints/
 
+#fly
+fly-certs/
+fly.toml
+
 # Distribution / packaging
 .Python
 build/
