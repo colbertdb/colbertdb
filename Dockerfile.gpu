@@ -1,4 +1,4 @@
-# Use the NVIDIA CUDA runtime base image
+# Use the NVIDIA CUDA devel base image
 FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
 
 # Set the environment variable to noninteractive to avoid prompts during package installations
@@ -38,8 +38,8 @@ ENV PATH="/venv/bin:${PATH}"
 ENV GIT_PYTHON_REFRESH="quiet"
 ENV LD_LIBRARY_PATH="/usr/local/cuda-12.4/lib64:$LD_LIBRARY_PATH"
 
-
 # Ensure the entrypoint script is executable
-RUN chmod +x /src/entrypoint.sh
+RUN chmod +x /src/scripts/entrypoint.sh
+RUN chmod +x /src/scripts/warm.py
 
 ENTRYPOINT ["uvicorn", "colbertdb.server.main:app", "--host", "0.0.0.0", "--port", "8080"]

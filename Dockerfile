@@ -1,9 +1,15 @@
-# Use Python 3.12 as the base image for the builder stage
-FROM python:3.11-slim-bookworm as builder
+# Use ubuntu:22.04 as the base image
+FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
 
-# Update the package list and install necessary packages
+# Set the environment variable to noninteractive to avoid prompts during package installations
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update the package list and install necessary packages including Python 3.11
 RUN apt-get update && \
-    apt-get install --no-install-suggests --no-install-recommends --yes wget tar pipx && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y python3.11 python3.11-dev python3.11-venv python3-pip  pipx curl && \
     rm -rf /var/lib/apt/lists/*
 
 # Set the PATH environment variable to include pipx binaries
@@ -13,49 +19,28 @@ ENV PATH="/root/.local/bin:${PATH}"
 RUN pipx install poetry && \
     pipx inject poetry poetry-plugin-bundle
 
+# Copy the application code
+COPY . /src/
+
 # Set the working directory
 WORKDIR /src
 
-# Copy the current directory contents into the container
-COPY . .
-
-# Conditionally create a virtual environment and install the main dependencies using Poetry
-RUN if [ "$ENV" = "production" ]; then poetry bundle venv --python=/usr/bin/python3 --only=main /venv; else poetry bundle venv --python=/usr/bin/python3 /venv; fi
+# Create a virtual environment and install the main dependencies using Poetry
+RUN poetry bundle venv --python=/usr/bin/python3.11 --only=main /venv
 
 # Download and extract the ColBERTv2.0 checkpoints
 RUN mkdir -p .checkpoints && \
-    wget -qO- https://downloads.cs.stanford.edu/nlp/data/colbert/colbertv2/colbertv2.0.tar.gz | tar xvz -C .checkpoints
-
-# Copy and run the initialization script
-COPY entrypoint.sh /src/
-
-# Use Python 3.12 as the base image for the final stage
-FROM python:3.11
+    curl https://downloads.cs.stanford.edu/nlp/data/colbert/colbertv2/colbertv2.0.tar.gz | tar xvz -C .checkpoints
 
 # Set environment variables for the virtual environment
 ENV VIRTUAL_ENV=/venv
 ENV PATH="/venv/bin:${PATH}"
 ENV GIT_PYTHON_REFRESH="quiet"
-
-# Copy the virtual environment from the builder stage
-COPY --from=builder /venv /venv
-
-# Copy the application code and checkpoints from the builder stage
-COPY --from=builder /src/colbertdb /src/colbertdb
-COPY --from=builder /src/.checkpoints /src/.checkpoints
-COPY --from=builder /src/entrypoint.sh /src/entrypoint.sh
-
-# Set the working directory
-WORKDIR /src
-
-# Install necessary runtime dependencies
-RUN apt-get update && \
-    apt-get install --no-install-suggests --no-install-recommends --yes python3.11-dev && \
-    rm -rf /var/lib/apt/lists/*
-
+ENV LD_LIBRARY_PATH="/usr/local/cuda-12.4/lib64:$LD_LIBRARY_PATH"
 
 # Ensure the entrypoint script is executable
-RUN chmod +x /src/entrypoint.sh
+RUN chmod +x /src/scripts/entrypoint.sh
+RUN chmod +x /src/scripts/warm.py
 
-ENTRYPOINT ["/src/entrypoint.sh"]
-
+ENTRYPOINT ["/src/scripts/entrypoint.sh"]
+CMD ["uvicorn", "colbertdb.server.main:app", "--host", "0.0.0.0", "--port", "8080"]
