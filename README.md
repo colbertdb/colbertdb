@@ -22,7 +22,7 @@ The motivation behind ColBERTdb is three-fold:
 
 ## Running ColBERTdb
 
-The Docker image uses a CUDA base image and will utilize GPUs if available. It is recommended to run ColBERTdb on hardware with GPUs as indexing documents is prohibitively slow using CPUs.
+The Docker image uses a CUDA base image and will utilize GPUs if available. It is recommended to run ColBERTdb on hardware with GPUs as indexing documents is prohibitively slow using CPUs. You'll need docker running (https://www.docker.com/products/docker-desktop/) to get started locally.
 
 ```sh
 docker build . -t colbertdb:latest
