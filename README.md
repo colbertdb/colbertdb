@@ -33,5 +33,5 @@ docker run colbertdb:latest
 
 Access the API documentation at the following URLs:
 
-- Client API Documentation: http://localhost:8080/client/docs
-- Collections API Documentation: http://localhost:8080/collections/docs
+- Client API Documentation: https://github.com/colbertdb/colbertdb/tree/main/colbertdb/server/apps/client/README.md
+- Collections API Documentation: https://github.com/colbertdb/colbertdb/tree/main/colbertdb/server/apps/collections/README.md
