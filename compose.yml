@@ -1,0 +1,23 @@
+services:
+  colbertdb:
+    container_name: colbertdb
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENV: dev
+    ports:
+      - "8080:8080"
+    command:
+      - uvicorn
+      - colbertdb.server.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8080'
+      - --reload
+    environment:
+      - AUTH_MODE=no_auth
+    volumes:
+      - ./colbertdb:/src/colbertdb
+      - ./.data/:/src/.data/

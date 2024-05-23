@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "colbertdb"
+version = "0.1.0"
+description = ""
+authors = ["Ryan Sloan <ryan@weaveapp.io>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.111.0"
+uvicorn = {extras = ["standard"], version = "^0.29.0"}
+faiss-cpu = "^1.8.0"
+srsly = "^2.4.8"
+setuptools = "^69.5.1"
+llama-index = "^0.10.36"
+llama-index-readers-web = "^0.1.13"
+torch = ">=1.13"
+nomkl = "^0.0.3"
+fast-pytorch-kmeans = "0.2.0.1"
+python-jose = "^3.3.0"
+colbert-ai = {git = "https://github.com/colbertdb/ColBERT.git"}
+
+
+[tool.poetry.group.dev.dependencies]
+pylint = "^3.1.0"
+black = "^24.4.2"
+pytest = "^8.2.0"
+mock = "^5.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
