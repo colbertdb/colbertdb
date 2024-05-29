@@ -42,19 +42,22 @@ def test_get_store_from_access_token():
     """Test that a valid access token returns the store."""
     with patch(
         "colbertdb.server.api.deps.load_mappings",
-        return_value={"supersecret": "default"},
+        return_value={"supersecret": "test"},
     ):
-        token = create_access_token({"store": "default"})
-        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
-        store = get_store_from_access_token(credentials)
-        assert store.name == "default"
+        with patch("colbertdb.core.models.store.Store.exists", return_value=True):
+            token = create_access_token({"store": "default"})
+            credentials = HTTPAuthorizationCredentials(
+                scheme="Bearer", credentials=token
+            )
+            store = get_store_from_access_token(credentials)
+            assert store.name == "default"
 
 
 def test_get_store_from_access_token_invalid_token():
     """Test that an invalid access token raises an HTTPException."""
     with patch(
         "colbertdb.server.api.deps.load_mappings",
-        return_value={"supersecret": "default"},
+        return_value={"supersecret": "test"},
     ):
         credentials = HTTPAuthorizationCredentials(
             scheme="Bearer", credentials="badtoken"
