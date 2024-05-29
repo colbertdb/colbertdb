@@ -28,10 +28,7 @@ The Docker image uses a CUDA base image and will utilize GPUs if available. It i
 docker build . -t colbertdb:latest
 docker run colbertdb:latest
 ```
-
-## API Documentation
-
-Access the API documentation at the following URLs:
-
-- Client API Documentation: https://github.com/colbertdb/colbertdb/tree/main/colbertdb/server/apps/client/README.md
-- Collections API Documentation: https://github.com/colbertdb/colbertdb/tree/main/colbertdb/server/apps/collections/README.md
+or
+```
+docker compose up --build
+```
