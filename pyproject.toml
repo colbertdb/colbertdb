@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "colbertdb"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Ryan Sloan <ryan@weaveapp.io>"]
 readme = "README.md"
@@ -19,6 +19,8 @@ nomkl = "^0.0.3"
 fast-pytorch-kmeans = "0.2.0.1"
 python-jose = "^3.3.0"
 colbert-ai = {git = "https://github.com/colbertdb/ColBERT.git"}
+datasets = "^2.19.1"
+pydantic-settings = "^2.2.1"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -26,6 +28,7 @@ pylint = "^3.1.0"
 black = "^24.4.2"
 pytest = "^8.2.0"
 mock = "^5.1.0"
+coverage = "^7.5.3"
 
 [build-system]
 requires = ["poetry-core"]

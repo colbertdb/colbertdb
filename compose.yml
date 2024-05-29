@@ -17,7 +17,11 @@ services:
       - '8080'
       - --reload
     environment:
-      - AUTH_MODE=no_auth
+      - AUTH_MODE=API_KEY
+      - DEFUALT_API_KEY=supersecret
+      - MANAGEMENT_API_KEY=supersecret
+      - COLBERT_LOAD_TORCH_EXTENSION_VERBOSE=True
     volumes:
       - ./colbertdb:/src/colbertdb
+      - ./scripts/warm.py:/src/scripts/warm.py
       - ./.data/:/src/.data/

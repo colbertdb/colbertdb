@@ -1,11 +1,34 @@
 """Warm the database with some example data."""
 
+import os
+from pathlib import Path
+
+import json
+
 from colbertdb.core.models.collection import Collection
-from colbertdb.server.apps.collections.models import CreateCollectionDocument
+from colbertdb.core.models.store import Store
+from colbertdb.server.models import CreateCollectionDocument
+
+
+DATA_DIR = ".data"
+STORES_FILE = os.path.join(DATA_DIR, "stores.json")
+
+
+def ensure_stores_file_exists():
+    """Ensure that the stores.json file exists."""
+    Path(DATA_DIR).mkdir(parents=True, exist_ok=True)
+    if not os.path.exists(STORES_FILE):
+        with open(STORES_FILE, "w", encoding="utf-8") as file:
+            json.dump({}, file)
 
 
 def warm_database():
     """Warm the database with some example data."""
+    store = Store(name="default", api_key=os.environ.get("API_KEY"))
+
+    if not store.exists():
+        store.create()
+
     text = (
         "Onigiri, also known as rice balls, are a popular Japanese snack made from white rice formed into triangular "
         "or cylindrical shapes and often wrapped in nori (seaweed). They are typically filled with a variety of "
@@ -24,9 +47,13 @@ def warm_database():
 
     # Insert the text into the database
     # Example insertion logic (adjust according to your database setup)
-    Collection.create(
-        name="health", collection=[CreateCollectionDocument(content=text)]
+    collection = Collection.create(
+        name="health",
+        collection=[CreateCollectionDocument(content=text)],
+        store_name=store.name,
     )
+
+    collection.add_to_index(collection=[CreateCollectionDocument(content=text)])
 
 
 if __name__ == "__main__":

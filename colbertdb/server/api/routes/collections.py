@@ -1,10 +1,10 @@
 """This module contains the FastAPI server for the ColbertDB API."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from colbertdb.core.models.collection import Collection
 from colbertdb.core.models.store import Store
-from colbertdb.server.apps.collections.models import (
+from colbertdb.server.models import (
     CreateCollectionRequest,
     SearchCollectionRequest,
     SearchResponse,
@@ -14,42 +14,45 @@ from colbertdb.server.apps.collections.models import (
     ListCollectionsResponse,
     GetCollectionResponse,
 )
+from colbertdb.server.api.deps import get_store_from_access_token
+
+router = APIRouter()
 
 
-collections_router = APIRouter()
-
-
-@collections_router.get("/", response_model=ListCollectionsResponse)
-def get_collections():
+@router.get("/", response_model=ListCollectionsResponse)
+def get_collections(store: Store = Depends(get_store_from_access_token)):
     """Get all collections in the specified store.
 
     Returns:
         str: Status of the operation.
     """
     try:
-        collections = Store().list_collections()
+        collections = store.list_collections()
         return ListCollectionsResponse(collections=collections)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@collections_router.get("/{collection_name}", response_model=GetCollectionResponse)
-def get_collection(collection_name: str):
+@router.get("/{collection_name}", response_model=GetCollectionResponse)
+def get_collection(
+    collection_name: str, store: Store = Depends(get_store_from_access_token)
+):
     """Get all collections in the specified store.
 
     Returns:
         str: Status of the operation.
     """
     try:
-        exists = Store().collection_exists(collection_name=collection_name)
+        exists = store.collection_exists(collection_name=collection_name)
         return GetCollectionResponse(exists=exists)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@collections_router.post("/", response_model=OperationResponse)
+@router.post("/", response_model=OperationResponse)
 def create_collection(
     request: CreateCollectionRequest,
+    store: Store = Depends(get_store_from_access_token),
 ) -> OperationResponse:
     """Create a collection in the specified store.
 
@@ -60,7 +63,9 @@ def create_collection(
         str: Status of the operation.
     """
     try:
-        Collection.create(name=request.name, collection=request.documents)
+        Collection.create(
+            name=request.name, collection=request.documents, store_name=store.name
+        )
         return OperationResponse(
             status="success", message="Collection created successfully."
         )
@@ -69,12 +74,11 @@ def create_collection(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@collections_router.post(
-    "/{collection_name}/documents", response_model=OperationResponse
-)
+@router.post("/{collection_name}/documents", response_model=OperationResponse)
 def add_documents(
     request: AddToCollectionRequest,
     collection_name: str,
+    store: Store = Depends(get_store_from_access_token),
 ):
     """Add documents to a collection.
 
@@ -86,7 +90,7 @@ def add_documents(
         str: Status of the operation.
     """
     try:
-        loaded_collection = Collection.load(name=collection_name)
+        loaded_collection = Collection.load(name=collection_name, store_name=store.name)
         loaded_collection.add_to_index(collection=request.documents)
         return OperationResponse(
             status="success", message="Collection updated successfully."
@@ -95,9 +99,11 @@ def add_documents(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@collections_router.post("/{collection_name}/search", response_model=SearchResponse)
+@router.post("/{collection_name}/search", response_model=SearchResponse)
 def search_collection(
-    collection_name: str, request: SearchCollectionRequest
+    collection_name: str,
+    request: SearchCollectionRequest,
+    store: Store = Depends(get_store_from_access_token),
 ) -> SearchResponse:
     """Search a collection.
 
@@ -109,7 +115,7 @@ def search_collection(
         SearchResponse: The search results.
     """
     try:
-        collection = Collection.load(name=collection_name)
+        collection = Collection.load(name=collection_name, store_name=store.name)
         docs = collection.search(query=request.query, k=request.k)
         return SearchResponse(documents=docs)
     except Exception as e:
@@ -117,8 +123,10 @@ def search_collection(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@collections_router.delete("/{collection_name}", response_model=OperationResponse)
-def delete_collection(collection_name: str):
+@router.delete("/{collection_name}", response_model=OperationResponse)
+def delete_collection(
+    collection_name: str, store: Store = Depends(get_store_from_access_token)
+):
     """Delete a collection in the specified store.
 
     Args:
@@ -128,7 +136,7 @@ def delete_collection(collection_name: str):
         str: Status of the operation.
     """
     try:
-        collection = Collection.load(name=collection_name)
+        collection = Collection.load(name=collection_name, store_name=store.name)
         collection.delete()
         return OperationResponse(
             status="success", message="Collection deleted successfully."
@@ -137,18 +145,21 @@ def delete_collection(collection_name: str):
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@collections_router.post("/{collection_name}/delete", response_model=OperationResponse)
-def delete_documents(collection_name: str, request: DeleteDocumentsRequest):
-    """Delete a collection in the specified store.
+@router.post("/{collection_name}/delete", response_model=OperationResponse)
+def delete_documents(
+    collection_name: str,
+    request: DeleteDocumentsRequest,
+    store: Store = Depends(get_store_from_access_token),
+):
+    """Delete documents from a collection.
 
     Args:
         collection_name (str): The name of the collection.
+        request (DeleteDocumentsRequest): The documents to delete.
 
-    Returns:
-        str: Status of the operation.
     """
     try:
-        collection = Collection.load(name=collection_name)
+        collection = Collection.load(name=collection_name, store_name=store.name)
         collection.delete_from_index(document_ids=request.document_ids)
         return OperationResponse(
             status="success", message="Collection deleted successfully."
