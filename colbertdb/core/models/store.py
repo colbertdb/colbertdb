@@ -45,6 +45,14 @@ class Store:
         self.name = name
         self.api_key = api_key
 
+    @classmethod
+    def get(cls, name: str) -> "Store":
+        """Get a store by name."""
+        mapping = load_mappings()
+        for key, value in mapping.items():
+            if value == name:
+                return cls(name=name, api_key=key)
+
     def list_collections(self) -> List[str]:
         """List all collections in a store."""
         store_index_path = Path(f"{DATA_DIR}/{self.name}/indexes")
@@ -85,7 +93,7 @@ class Store:
         # Save the updated mappings
         save_mappings(mappings)
 
-        return self.api_key
+        return self
 
 
 ensure_stores_file_exists()

@@ -11,6 +11,7 @@ from colbertdb.server.core.config import settings
 
 
 header_schema = APIKeyHeader(name="x-api-key")
+management_header_schema = APIKeyHeader(name="x-management-api-key")
 jwt_schema = HTTPBearer()
 
 
@@ -51,3 +52,11 @@ def get_store_from_access_token(
         return Store(name=store_name)
     except JWTError as e:
         raise credentials_exception from e
+
+
+def verify_management_api_key(
+    api_key: str = Depends(management_header_schema),
+):
+    """Verify the management API key."""
+    if api_key != settings.MANAGEMENT_API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API key")

@@ -13,4 +13,4 @@ router = APIRouter()
 async def connect(store: Store = Depends(verify_store)):
     """Connect to the server."""
     token = create_access_token({"store": store.name})
-    return ConnectResponse(token=token)
+    return ConnectResponse(access_token=token)

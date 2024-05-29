@@ -105,3 +105,29 @@ class DeleteDocumentsRequest(BaseModel):
     """
 
     document_ids: List[str]
+
+
+class CreateStoreRequest(BaseModel):
+    """
+    Pydantic model for creating a store.
+    """
+
+    name: str
+
+
+class CreateStoreResponse(BaseModel):
+    """
+    Pydantic model for the response of creating a store.
+    """
+
+    name: str
+    api_key: str
+
+
+class GetStoreResponse(BaseModel):
+    """
+    Pydantic model for the response of getting a store.
+    """
+
+    name: str
+    api_key: str

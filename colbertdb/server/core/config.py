@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "ColbertDB"
     ALGORITHM: str = "HS256"
     SECRET_KEY: str
+    MANAGEMENT_API_KEY: str
 
 
 settings = Settings()  # type: ignore

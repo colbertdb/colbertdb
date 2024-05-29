@@ -151,13 +151,12 @@ def delete_documents(
     request: DeleteDocumentsRequest,
     store: Store = Depends(get_store_from_access_token),
 ):
-    """Delete a collection in the specified store.
+    """Delete documents from a collection.
 
     Args:
         collection_name (str): The name of the collection.
+        request (DeleteDocumentsRequest): The documents to delete.
 
-    Returns:
-        str: Status of the operation.
     """
     try:
         collection = Collection.load(name=collection_name, store_name=store.name)
