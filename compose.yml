@@ -17,7 +17,10 @@ services:
       - '8080'
       - --reload
     environment:
-      - AUTH_MODE=no_auth
+      - AUTH_MODE=API_KEY
+      - DEFUALT_API_KEY=supersecret
+      - MANAGEMENT_API_KEY=supersecret
     volumes:
       - ./colbertdb:/src/colbertdb
+      - ./scripts/warm.py:/src/scripts/warm.py
       - ./.data/:/src/.data/

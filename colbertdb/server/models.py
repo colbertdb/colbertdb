@@ -1,9 +1,25 @@
-""" Models for the server. """
+""" Pydantic models app. """
 
-from typing import Optional, List
+from typing import List, Optional
 from pydantic import BaseModel
 
 from colbertdb.core.models.pydantic_models import Document
+
+
+class ConnectResponse(BaseModel):
+    """
+    Pydantic model for a token.
+    """
+
+    access_token: str
+
+
+class ConnectRequest(BaseModel):
+    """
+    Pydantic model for a connect request.
+    """
+
+    api_key: Optional[str] = None
 
 
 class CreateCollectionDocument(BaseModel):

@@ -1,14 +1,14 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import HTTPException, status
-from jose import JWTError, jwt
+from jose import jwt
 
-from colbertdb.server.stores.api_keys import CLIENT_API_KEY
+from colbertdb.server.core.config import settings
+
 
 # Configuration
-SECRET_KEY = "secret"
+
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 
 def create_access_token(data: dict):
@@ -20,23 +20,5 @@ def create_access_token(data: dict):
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
-
-def verify_token(token: str):
-    """Verify the token."""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        token = token.split("Bearer ")[1]
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        api_key: str = payload.get("api_key")
-        if api_key is None or api_key != CLIENT_API_KEY:
-            raise credentials_exception
-    except JWTError as exc:
-        raise credentials_exception from exc
-    return "OK"

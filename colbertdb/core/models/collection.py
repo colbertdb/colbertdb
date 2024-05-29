@@ -50,9 +50,6 @@ class Collection:
             load_from_index=False,
             checkpoint=checkpoint,
         )
-        store = Store(name=store_name)
-        if not store.exists():
-            store.create()
         instance.index(collection, index_name=name)
         return instance
 
