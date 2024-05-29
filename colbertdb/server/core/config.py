@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "ColbertDB"
     ALGORITHM: str = "HS256"
-    SECRET_KEY: str = os.getenv("SECRET_KEY")
-    MANAGEMENT_API_KEY: str = os.getenv("MANAGEMENT_API_KEY")
+    SECRET_KEY: str
+    MANAGEMENT_API_KEY: str
 
 
 settings = Settings()  # type: ignore

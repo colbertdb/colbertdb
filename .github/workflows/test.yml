@@ -1,5 +1,9 @@
 name: Python package
 
+env:
+  SECRET_KEY: supersecret
+  MANAGEMENT_API_KEY: supersecret
+
 on:
   push:
     branches:
