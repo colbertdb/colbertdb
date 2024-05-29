@@ -1,6 +1,10 @@
 """Configuration settings for the application"""
 
+import os
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -12,8 +16,8 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "ColbertDB"
     ALGORITHM: str = "HS256"
-    SECRET_KEY: str = "supersecret"
-    MANAGEMENT_API_KEY: str = "supersecret"
+    SECRET_KEY: str = os.getenv("SECRET_KEY")
+    MANAGEMENT_API_KEY: str = os.getenv("MANAGEMENT_API_KEY")
 
 
 settings = Settings()  # type: ignore
