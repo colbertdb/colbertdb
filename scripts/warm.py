@@ -25,6 +25,7 @@ def ensure_stores_file_exists():
 def warm_database():
     """Warm the database with some example data."""
     store = Store(name="default", api_key=os.environ.get("API_KEY"))
+
     if not store.exists():
         store.create()
 
