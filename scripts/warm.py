@@ -46,11 +46,13 @@ def warm_database():
 
     # Insert the text into the database
     # Example insertion logic (adjust according to your database setup)
-    Collection.create(
+    collection = Collection.create(
         name="health",
         collection=[CreateCollectionDocument(content=text)],
         store_name=store.name,
     )
+
+    collection.add_to_index(collection=[CreateCollectionDocument(content=text)])
 
 
 if __name__ == "__main__":

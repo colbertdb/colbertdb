@@ -20,6 +20,7 @@ def verify_store(store_name: str, api_key: str = Depends(header_schema)) -> Stor
     if os.getenv("AUTH_MODE") == "no_auth":
         return Store(name=store_name)
     key_mapping = load_mappings()
+
     store = key_mapping.get(api_key)
     if not store:
         raise HTTPException(status_code=401, detail="Invalid API key")

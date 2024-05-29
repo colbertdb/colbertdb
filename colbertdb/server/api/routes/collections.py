@@ -115,7 +115,7 @@ def search_collection(
         SearchResponse: The search results.
     """
     try:
-        collection = Collection.load(name=collection_name, store_name=store.nam)
+        collection = Collection.load(name=collection_name, store_name=store.name)
         docs = collection.search(query=request.query, k=request.k)
         return SearchResponse(documents=docs)
     except Exception as e:
