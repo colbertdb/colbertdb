@@ -18,9 +18,8 @@ router = APIRouter()
 )
 def create_store(request: CreateStoreRequest):
     """Create a store."""
-    store = Store(name=request.name)
-    api_key = store.create()
-    return {"name": store.name, "api_key": api_key}
+    store = Store(name=request.name).create()
+    return {"name": store.name, "api_key": store.api_key}
 
 
 @router.get(

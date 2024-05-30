@@ -70,7 +70,7 @@ class Store:
         store_path = Path(f"{DATA_DIR}/{self.name}")
         return store_path.exists()
 
-    def create(self) -> str:
+    def create(self) -> "Store":
         """Create a store and register it with a new or provided API key."""
         print(f"Creating store: {self.name}")
         store_path = f"{DATA_DIR}/{self.name}"
