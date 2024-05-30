@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 from jose import jwt
+import secrets
 
 from colbertdb.server.core.config import settings
 
@@ -21,3 +22,8 @@ def create_access_token(data: dict):
         to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )
     return encoded_jwt
+
+
+def generate_api_key(length: int = 32) -> str:
+    """Generate a secure API key."""
+    return secrets.token_urlsafe(length)
