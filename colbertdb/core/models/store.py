@@ -9,6 +9,7 @@ from colbertdb.server.services.file_ops import (
     load_mappings,
     save_mappings,
     dir_exists,
+    ensure_stores_file_exists,
 )
 from colbertdb.server.services.auth import generate_api_key
 
@@ -70,3 +71,6 @@ class Store:
         save_mappings(mappings)
 
         return self
+
+
+ensure_stores_file_exists()

@@ -1,17 +1,22 @@
 """This module contains the APIKeyManager class, which manages the API keys for the stores."""
 
-import json
 import secrets
 import threading
 from pathlib import Path
 from typing import Dict, Optional
-from colbertdb.server.services.file_ops import ensure_stores_file_exists
+from colbertdb.server.services.file_ops import (
+    ensure_stores_file_exists,
+    load_mappings,
+    save_mappings,
+)
 from colbertdb.server.core.config import settings
 
 STORES_PATH = Path(settings.DATA_DIR) / settings.STORES_FILE
 
 
 class APIKeyManager:
+    """A class for managing the API keys for the stores."""
+
     def __init__(self):
         self.lock = threading.Lock()
         self.api_keys: Dict[str, str] = {}
@@ -21,14 +26,12 @@ class APIKeyManager:
         """Load the store mappings from the stores.json file."""
         with self.lock:
             ensure_stores_file_exists()
-            with open(STORES_PATH, "r", encoding="utf-8") as file:
-                self.api_keys = json.load(file)
+            self.api_keys = load_mappings(STORES_PATH)
 
     def _save_api_keys(self):
         """Save the store mappings to the stores.json file."""
         with self.lock:
-            with open(STORES_PATH, "w", encoding="utf-8") as file:
-                json.dump(self.api_keys, file)
+            save_mappings(self.api_keys, STORES_PATH)
 
     def generate_api_key(self, length: int = 32) -> str:
         """Generate a secure API key."""

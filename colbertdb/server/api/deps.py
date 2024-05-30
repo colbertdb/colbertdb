@@ -14,7 +14,6 @@ from colbertdb.server.services.api_key_manager import api_key_manager
 header_schema = APIKeyHeader(name="x-api-key")
 management_header_schema = APIKeyHeader(name="x-management-api-key")
 jwt_schema = HTTPBearer()
-stores = load_mappings()
 
 
 def verify_store(store_name: str, api_key: str = Depends(header_schema)) -> Store:
