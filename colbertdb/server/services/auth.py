@@ -1,12 +1,12 @@
-from datetime import datetime, timedelta, timezone
+""" Authentication services. """
 
-from jose import jwt
+from datetime import datetime, timedelta, timezone
 import secrets
 
+from jose import jwt
+
+
 from colbertdb.server.core.config import settings
-
-
-# Configuration
 
 
 def create_access_token(data: dict):

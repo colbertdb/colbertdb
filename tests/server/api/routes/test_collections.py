@@ -21,7 +21,8 @@ def api_client():
 def test_get_collections(api_client):
     """Test retrieving all collections in a store."""
     with patch(
-        "colbertdb.server.api.deps.load_mappings", return_value={"supersecret": "test"}
+        "colbertdb.server.services.file_ops.load_mappings",
+        return_value={"supersecret": "test"},
     ):
         with patch(
             "colbertdb.core.models.store.Store.list_collections",
@@ -43,7 +44,8 @@ def test_get_collections(api_client):
 def test_get_collection(api_client):
     """Test retrieving all collections in a store."""
     with patch(
-        "colbertdb.server.api.deps.load_mappings", return_value={"supersecret": "test"}
+        "colbertdb.server.services.file_ops.load_mappings",
+        return_value={"supersecret": "test"},
     ):
         with patch("colbertdb.core.models.store.Store.exists", return_value=True):
             token = create_access_token({"store": "test"})
@@ -58,7 +60,8 @@ def test_get_collection(api_client):
 def test_create_collection(api_client):
     """Test creating a collection in a store."""
     with patch(
-        "colbertdb.server.api.deps.load_mappings", return_value={"supersecret": "test"}
+        "colbertdb.server.services.file_ops.load_mappings",
+        return_value={"supersecret": "test"},
     ):
         with patch("colbertdb.core.models.store.Store.exists", return_value=True):
             with patch(
@@ -94,7 +97,8 @@ def test_create_collection(api_client):
 def test_add_documents(api_client):
     """Test adding documents to a collection in a store."""
     with patch(
-        "colbertdb.server.api.deps.load_mappings", return_value={"supersecret": "test"}
+        "colbertdb.server.services.file_ops.load_mappings",
+        return_value={"supersecret": "test"},
     ):
         with patch("colbertdb.core.models.store.Store.exists", return_value=True):
             with patch("colbertdb.core.models.collection.Collection.load") as mock_load:
@@ -123,7 +127,8 @@ def test_delete_collection(api_client):
     """Test deleting a collection in a store."""
 
     with patch(
-        "colbertdb.server.api.deps.load_mappings", return_value={"supersecret": "test"}
+        "colbertdb.server.services.file_ops.load_mappings",
+        return_value={"supersecret": "test"},
     ):
         with patch("colbertdb.core.models.store.Store.exists", return_value=True):
             with patch("colbertdb.core.models.collection.Collection.load") as mock_load:
@@ -152,7 +157,8 @@ def test_delete_documents(api_client):
 
     delete_request = DeleteDocumentsRequest(document_ids=["1", "2", "3"])
     with patch(
-        "colbertdb.server.api.deps.load_mappings", return_value={"supersecret": "test"}
+        "colbertdb.server.services.file_ops.load_mappings",
+        return_value={"supersecret": "test"},
     ):
         with patch("colbertdb.core.models.store.Store.exists", return_value=True):
             with patch("colbertdb.core.models.collection.Collection.load") as mock_load:
