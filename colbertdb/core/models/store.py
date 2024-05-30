@@ -12,6 +12,7 @@ from colbertdb.server.services.file_ops import (
     ensure_stores_file_exists,
 )
 from colbertdb.server.services.auth import generate_api_key
+from colbertdb.server.core.config import settings
 
 
 class Store:
@@ -24,7 +25,7 @@ class Store:
     @classmethod
     def get(cls, name: str) -> "Store":
         """Get a store by name."""
-        mapping = load_mappings()
+        mapping = load_mappings(Path(settings.DATA_DIR) / settings.STORES_FILE)
         for key, value in mapping.items():
             if value == name:
                 return cls(name=name, api_key=key)
@@ -54,7 +55,7 @@ class Store:
         os.makedirs(store_path, exist_ok=True)
 
         # Load existing mappings
-        mappings = load_mappings()
+        mappings = load_mappings(Path(settings.DATA_DIR) / settings.STORES_FILE)
 
         if self.api_key:
             if self.api_key in mappings and mappings[self.api_key] != self.name:
@@ -68,7 +69,7 @@ class Store:
             mappings[self.api_key] = self.name
 
         # Save the updated mappings
-        save_mappings(mappings)
+        save_mappings(mappings, Path(settings.DATA_DIR) / settings.STORES_FILE)
 
         return self
 
