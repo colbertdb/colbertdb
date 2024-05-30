@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, status
+from typing import Union
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from colbertdb.core.models.store import Store
 from colbertdb.server.models import (
@@ -18,8 +19,12 @@ router = APIRouter()
 )
 def create_store(request: CreateStoreRequest):
     """Create a store."""
-    store = Store(name=request.name).create()
-    return {"name": store.name, "api_key": store.api_key}
+    try:
+        store = Store(name=request.name).create()
+        return {"name": store.name, "api_key": store.api_key}
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get(

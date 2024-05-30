@@ -10,9 +10,9 @@ from colbertdb.server.services.file_ops import (
     save_mappings,
     dir_exists,
     ensure_stores_file_exists,
+    make_dir,
 )
 from colbertdb.server.services.auth import generate_api_key
-from colbertdb.server.core.config import settings
 
 
 class Store:
@@ -51,9 +51,9 @@ class Store:
     def create(self) -> str:
         """Create a store and register it with a new or provided API key."""
         print(f"Creating store: {self.name}")
-        store_path = f"{settings.DATA_DIR}/{self.name}"
-        os.makedirs(store_path, exist_ok=True)
-
+        make_dir(f"{settings.DATA_DIR}/{self.name}")
+        if self.exists():
+            raise ValueError("Store already exists.")
         # Load existing mappings
         mappings = load_mappings(Path(settings.DATA_DIR) / settings.STORES_FILE)
 

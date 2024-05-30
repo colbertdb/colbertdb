@@ -17,7 +17,7 @@ def ensure_stores_file_exists(
             json.dump({}, file)
 
 
-def load_mappings(path: str) -> Dict[str, str]:
+def load_mappings(path: Path) -> Dict[str, str]:
     """Load the store mappings from the stores file."""
     try:
         with open(path, "r", encoding="utf-8") as file:
@@ -30,6 +30,12 @@ def save_mappings(mappings: Dict[str, str], path: str):
     """Save the store mappings to the stores file."""
     with open(path, "w", encoding="utf-8") as file:
         json.dump(mappings, file)
+
+
+def make_dir(path: str):
+    """Make a directory."""
+    path = Path(path)
+    path.mkdir(parents=True, exist_ok=True)
 
 
 def dir_exists(path: str):
