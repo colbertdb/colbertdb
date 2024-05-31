@@ -8,26 +8,25 @@ import json
 from colbertdb.core.models.collection import Collection
 from colbertdb.core.models.store import Store
 from colbertdb.server.models import CreateCollectionDocument
-
-
-DATA_DIR = ".data"
-STORES_FILE = os.path.join(DATA_DIR, "stores.json")
+from colbertdb.server.core.config import settings
 
 
 def ensure_stores_file_exists():
     """Ensure that the stores.json file exists."""
-    Path(DATA_DIR).mkdir(parents=True, exist_ok=True)
-    if not os.path.exists(STORES_FILE):
-        with open(STORES_FILE, "w", encoding="utf-8") as file:
+    Path(settings.DATA_DIR).mkdir(parents=True, exist_ok=True)
+    if not os.path.exists(settings.STORES_FILE):
+        with open(settings.STORES_FILE, "w", encoding="utf-8") as file:
             json.dump({}, file)
 
 
 def warm_database():
     """Warm the database with some example data."""
-    store = Store(name="default", api_key=os.environ.get("API_KEY"))
+    store = Store(name="default", api_key=settings.DEFAULT_API_KEY)
 
-    if not store.exists():
+    try:
         store.create()
+    except ValueError:
+        print(f"Store {store.name} already exists.")
 
     text = (
         "Onigiri, also known as rice balls, are a popular Japanese snack made from white rice formed into triangular "

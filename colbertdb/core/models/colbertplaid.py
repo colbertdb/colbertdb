@@ -61,7 +61,7 @@ class ColbertPLAID:
     def __init__(
         self,
         index_name: Optional[str] = None,
-        store_name: Optional[str] = "dev",
+        store_name: Optional[str] = None,
         load_from_index: bool = False,
         checkpoint: Union[str, Path] = ".checkpoints/colbertv2.0",
     ):

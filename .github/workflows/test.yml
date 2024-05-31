@@ -3,6 +3,7 @@ name: Python package
 env:
   SECRET_KEY: supersecret
   MANAGEMENT_API_KEY: supersecret
+  DEFAULT_API_KEY: supersecret
 
 on:
   push:

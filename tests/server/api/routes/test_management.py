@@ -3,6 +3,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
+from colbertdb.core.models.store import Store
 from colbertdb.server.main import app
 from colbertdb.server.core.config import settings
 from colbertdb.server.models import CreateStoreRequest
@@ -20,12 +21,13 @@ def test_create_store(
 ):
     """Test creating a store."""
     settings.MANAGEMENT_API_KEY = "mock_management_api_key"
-    mock_store = MagicMock()
+    mock_store = Store(name="test_store", api_key="mock_api")
     with patch("colbertdb.core.models.store.Store.create", return_value="mock_api_key"):
         with patch("colbertdb.core.models.store.Store") as MockStore:
             MockStore.return_value = mock_store
-            mock_store.name = "test_store"
-            mock_store.create.return_value = "mock_api_key"
+            mock_store.create.return_value = Store(
+                name="test_store", api_key="mock_api_key"
+            )
 
             request = CreateStoreRequest(name="test_store")
             response = api_client.post(
