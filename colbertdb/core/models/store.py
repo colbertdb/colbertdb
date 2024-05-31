@@ -1,18 +1,15 @@
 """This module contains the Store class, which represents a store in ColbertDB."""
 
-import os
-
 from typing import List, Optional
 from pathlib import Path
 from colbertdb.server.core.config import settings
 from colbertdb.server.services.file_ops import (
     load_mappings,
-    save_mappings,
     dir_exists,
     ensure_stores_file_exists,
     make_dir,
 )
-from colbertdb.server.services.auth import generate_api_key
+from colbertdb.server.services.api_key_manager import api_key_manager
 
 
 class Store:
@@ -39,37 +36,23 @@ class Store:
 
     def collection_exists(self, collection_name: str) -> bool:
         """Check if a collection exists in a store."""
-        store_index_path = Path(
-            f"{settings.DATA_DIR}/{self.name}/indexes/{collection_name}"
-        )
-        return store_index_path.exists()
+        return dir_exists(f"{settings.DATA_DIR}/{self.name}/indexes/{collection_name}")
 
     def exists(self) -> bool:
         """Check if a store exists."""
         return dir_exists(f"{settings.DATA_DIR}/{self.name}")
 
     def create(self) -> str:
-        """Create a store and register it with a new or provided API key."""
-        print(f"Creating store: {self.name}")
-        make_dir(f"{settings.DATA_DIR}/{self.name}")
+        """Create a store and register it with a new API key."""
+        # Check if the store already exists
         if self.exists():
-            raise ValueError("Store already exists.")
-        # Load existing mappings
-        mappings = load_mappings(Path(settings.DATA_DIR) / settings.STORES_FILE)
+            raise ValueError(f"Store {self.name} already exists.")
 
-        if self.api_key:
-            if self.api_key in mappings and mappings[self.api_key] != self.name:
-                raise ValueError(
-                    "Provided API key is already associated with another store."
-                )
-            mappings[self.api_key] = self.name
-        else:
-            # Generate a new API key if not provided
-            self.api_key = generate_api_key()
-            mappings[self.api_key] = self.name
+        # make store directory
+        make_dir(f"{settings.DATA_DIR}/{self.name}")
 
-        # Save the updated mappings
-        save_mappings(mappings, Path(settings.DATA_DIR) / settings.STORES_FILE)
+        # Register store and generate api key
+        self.api_key = api_key_manager.register_store(self.name)
 
         return self
 

@@ -23,8 +23,10 @@ def warm_database():
     """Warm the database with some example data."""
     store = Store(name="default", api_key=settings.DEFAULT_API_KEY)
 
-    if not store.exists():
+    try:
         store.create()
+    except ValueError:
+        print(f"Store {store.name} already exists.")
 
     text = (
         "Onigiri, also known as rice balls, are a popular Japanese snack made from white rice formed into triangular "
