@@ -38,6 +38,7 @@ ENV VIRTUAL_ENV=/venv
 ENV PATH="/venv/bin:${PATH}"
 ENV GIT_PYTHON_REFRESH="quiet"
 ENV LD_LIBRARY_PATH="/usr/local/cuda-12.4/lib64:$LD_LIBRARY_PATH"
+ENV TORCH_CUDA_ARCH_LIST="8.0 8.6 8.7"
 
 # Ensure the entrypoint script is executable
 RUN chmod +x /src/scripts/entrypoint.sh && \

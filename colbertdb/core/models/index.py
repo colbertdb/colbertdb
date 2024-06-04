@@ -8,7 +8,7 @@ from typing import Any, List, Optional, TypeVar, Union
 
 from colbert import Indexer, IndexUpdater, Searcher
 from colbert.indexing.collection_indexer import CollectionIndexer
-from colbert.infra import ColBERTConfig
+from colbert.infra import ColBERTConfig, Run, RunConfig
 
 from colbertdb.core.utils import torch_kmeans
 
@@ -36,6 +36,7 @@ class PLAIDModelIndex:
         index_name: Optional["str"] = None,
         overwrite: Union[bool, str] = "reuse",
         verbose: bool = True,
+        store_name: Optional[str] = None,
         **kwargs,
     ) -> "PLAIDModelIndex":
         """
@@ -55,7 +56,7 @@ class PLAIDModelIndex:
         """
         []
         return PLAIDModelIndex(config).build(
-            checkpoint, collection, index_name, overwrite, verbose, **kwargs
+            checkpoint, collection, index_name, overwrite, verbose, store_name, **kwargs
         )
 
     @staticmethod
@@ -89,6 +90,7 @@ class PLAIDModelIndex:
         index_name: Optional[str] = None,
         overwrite: Union[bool, str] = "reuse",
         verbose: bool = True,
+        store_name: Optional[str] = None,
         **kwargs,
     ) -> "PLAIDModelIndex":
         """
@@ -136,15 +138,16 @@ class PLAIDModelIndex:
         print("Using pytorch kmeans for clustering")
         CollectionIndexer._train_kmeans = self.pytorch_kmeans
 
-        indexer = Indexer(
-            checkpoint=checkpoint,
-            config=self.config,
-            verbose=verbose,
-        )
-        print("Configuring the index...")
-        indexer.configure(avoid_fork_if_possible=True)
-        print("Indexing")
-        indexer.index(name=index_name, collection=collection, overwrite=overwrite)
+        with Run().context(RunConfig(experiment=store_name)):
+            indexer = Indexer(
+                checkpoint=checkpoint,
+                config=self.config,
+                verbose=verbose,
+            )
+            print("Configuring the index...")
+            indexer.configure(avoid_fork_if_possible=True)
+            print("Indexing")
+            indexer.index(name=index_name, collection=collection, overwrite=overwrite)
 
         return self
 
@@ -301,6 +304,7 @@ class PLAIDModelIndex:
         index_name: str,
         new_collection: List[str],
         verbose: bool = True,
+        store_name: Optional[str] = None,
         **kwargs,
     ) -> None:
         """
@@ -342,6 +346,7 @@ class PLAIDModelIndex:
                 index_name=index_name,
                 overwrite="force_silent_overwrite",
                 verbose=verbose,
+                store_name=store_name,
                 **kwargs,
             )
         else:

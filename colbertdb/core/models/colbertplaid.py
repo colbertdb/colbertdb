@@ -76,6 +76,7 @@ class ColbertPLAID:
         self.in_memory_metadatas = None
         self.index_name = index_name
         self.loaded_from_index = load_from_index
+        self.store_name = store_name
 
         n_gpu = 1 if torch.cuda.device_count() == 0 else torch.cuda.device_count()
         self.model_index: Optional[PLAIDModelIndex] = None
@@ -235,6 +236,7 @@ class ColbertPLAID:
             new_collection,
             verbose=1,
             bsize=bsize,
+            store_name=self.store_name,
         )
         self.config = self.model_index.config
 
@@ -425,6 +427,7 @@ class ColbertPLAID:
             overwrite,
             verbose=1,
             bsize=bsize,
+            store_name=self.store_name,
         )
         self.config = self.model_index.config
         self._save_index_metadata()
