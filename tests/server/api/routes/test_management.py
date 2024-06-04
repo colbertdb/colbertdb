@@ -32,8 +32,8 @@ def test_create_store(
             request = CreateStoreRequest(name="test_store")
             response = api_client.post(
                 f"{settings.API_V1_STR}/management/stores",
-                json=request.dict(),
-                headers={"X-MANAGEMENT-API-KEY": "mock_management_api_key"},
+                json=request.model_dump(),
+                headers={"X-API-KEY": "mock_management_api_key"},
             )
 
             assert response.status_code == 200
@@ -42,7 +42,7 @@ def test_create_store(
             response = api_client.post(
                 f"{settings.API_V1_STR}/management/stores",
                 json=request.dict(),
-                headers={"X-MANAGEMENT-API-KEY": "mock_management_api_key_bad"},
+                headers={"X-API-KEY": "mock_management_api_key_bad"},
             )
 
             assert response.status_code == 401
@@ -58,7 +58,7 @@ def test_get_store(api_client):
 
         response = api_client.get(
             f"{settings.API_V1_STR}/management/stores/test_store",
-            headers={"X-MANAGEMENT-API-KEY": "mock_management_api_key"},
+            headers={"X-API-KEY": "mock_management_api_key"},
         )
 
         assert response.status_code == 200
@@ -67,7 +67,7 @@ def test_get_store(api_client):
     with patch("colbertdb.core.models.store.Store.get", return_value=None):
         response = api_client.get(
             f"{settings.API_V1_STR}/stores/non_existent_store",
-            headers={"X-MANAGEMENT-API-KEY": "mock_management_api_key"},
+            headers={"X-API-KEY": "mock_management_api_key"},
         )
 
         assert response.status_code == 404

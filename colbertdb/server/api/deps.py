@@ -12,7 +12,6 @@ from colbertdb.server.services.api_key_manager import api_key_manager
 
 
 header_schema = APIKeyHeader(name="x-api-key")
-management_header_schema = APIKeyHeader(name="x-management-api-key")
 jwt_schema = HTTPBearer()
 
 
@@ -55,7 +54,7 @@ def get_store_from_access_token(
 
 
 def verify_management_api_key(
-    api_key: str = Depends(management_header_schema),
+    api_key: str = Depends(header_schema),
 ):
     """Verify the management API key."""
     if api_key != settings.MANAGEMENT_API_KEY:
