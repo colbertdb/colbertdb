@@ -94,6 +94,73 @@ def test_create_collection(api_client):
                     )
 
 
+def test_create_duplicate_collection(api_client):
+    """Test creating a collection in a store."""
+    with patch(
+        "colbertdb.server.services.file_ops.load_mappings",
+        return_value={"supersecret": "test"},
+    ):
+        with patch("colbertdb.core.models.store.Store.exists", return_value=True):
+            with patch(
+                "colbertdb.core.models.store.Store.list_collections"
+            ) as mock_list_collections:
+                with patch(
+                    "colbertdb.server.api.deps.verify_store"
+                ) as mock_verify_store:
+
+                    mock_store = MagicMock()
+                    mock_verify_store.return_value = mock_store
+                    mock_list_collections.return_value = ["test"]
+                    token = create_access_token({"store": "test"})
+                    response = api_client.post(
+                        f"{settings.API_V1_STR}/collections",
+                        json={"name": "test", "documents": [{"content": "foo"}]},
+                        headers={"Authorization": f"Bearer {token}"},
+                    )
+
+                    assert response.status_code == 409
+
+
+def test_create_duplicate_collection_force_create(api_client):
+    """Test creating a collection in a store."""
+    with patch(
+        "colbertdb.server.services.file_ops.load_mappings",
+        return_value={"supersecret": "test"},
+    ):
+        with patch("colbertdb.core.models.store.Store.exists", return_value=True):
+            with patch(
+                "colbertdb.core.models.store.Store.list_collections"
+            ) as mock_list_collections:
+                with patch(
+                    "colbertdb.core.models.collection.Collection.create"
+                ) as mock_create:
+                    with patch(
+                        "colbertdb.server.api.deps.verify_store"
+                    ) as mock_verify_store:
+                        mock_store = MagicMock()
+                        mock_verify_store.return_value = mock_store
+                        mock_list_collections.return_value = ["test"]
+                        token = create_access_token({"store": "test"})
+                        response = api_client.post(
+                            f"{settings.API_V1_STR}/collections",
+                            json={
+                                "name": "test",
+                                "documents": [{"content": "foo"}],
+                                "options": {"force_create": True},
+                            },
+                            headers={"Authorization": f"Bearer {token}"},
+                        )
+
+                        assert response.status_code == 200
+                        mock_create.assert_called_once_with(
+                            name="test",
+                            collection=[
+                                CreateCollectionDocument(content="foo", metadata=None)
+                            ],
+                            store_name="test",
+                        )
+
+
 def test_add_documents(api_client):
     """Test adding documents to a collection in a store."""
     with patch(

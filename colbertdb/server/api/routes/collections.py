@@ -63,6 +63,14 @@ def create_collection(
         str: Status of the operation.
     """
     try:
+        store = Store(name=store.name)
+        if (request.name in store.list_collections()) and (
+            not request.options.force_create
+        ):
+            raise HTTPException(
+                status_code=409,
+                detail="Collection already exists. Set force_create to True to overwrite.",
+            )
         Collection.create(
             name=request.name, collection=request.documents, store_name=store.name
         )
@@ -70,7 +78,8 @@ def create_collection(
             status="success", message="Collection created successfully."
         )
     except Exception as e:
-        print(e)
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
