@@ -56,14 +56,25 @@ class OperationResponse(BaseModel):
     message: str
 
 
+class CreateCollectionsOptions(BaseModel):
+    """
+    Pydantic model for options for creating a collection.
+    """
+
+    force_create: Optional[bool] = False
+
+
 class CreateCollectionRequest(BaseModel):
     """
     Pydantic model for creating a collection.
     """
 
+    class Config:
+        arbitrary_types_allowed = True
+
     name: str
     documents: list[CreateCollectionDocument]
-    options: Optional[dict] = None
+    options: Optional[CreateCollectionsOptions] = CreateCollectionsOptions()
 
 
 class AddToCollectionRequest(BaseModel):
