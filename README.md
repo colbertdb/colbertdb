@@ -14,11 +14,11 @@ The motivation behind colbertDB is three-fold:
 
 ## Features
 
-- **ColBERT and PLAID Indexing:** Leverages state-of-the-art ColBERT and PLAID strategies for efficient and accurate information retrieval.
+- **ColBERT and PLAID Indexing:** Leverages state-of-the-art colbertDB and PLAID strategies for efficient and accurate information retrieval.
 - **Simple API:** Easy-to-use REST API for managing collections, adding documents, and performing searches.
 - **Intelligent Defaults:** Pre-configured settings for document chunking, embedding, and indexing, ensuring optimal performance with minimal configuration.
 - **FastAPI Integration:** Built using FastAPI, providing a modern, fast, and robust web framework.
-- **Python Client:** A Python client, [pycolbertDB](https://github.com/colbertdb/pycolbertdb.git), is available for seamless integration.
+- **Python and TypeScript clients:** [pycolbertdb](https://github.com/colbertdb/pycolbertdb.git) and [colbertdb-ts](https://github.com/colbertdb/colbertdb-ts.git) are available for seamless integration.
 
 ## Running colbertDB
 
