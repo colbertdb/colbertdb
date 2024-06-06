@@ -3,9 +3,6 @@
 # Create the directory
 mkdir -p /src/.data
 
-#activate the env
-conda activate myenv
-
 # Run the warming script
 python /src/scripts/warm.py
 
