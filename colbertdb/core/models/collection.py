@@ -50,7 +50,7 @@ class Collection:
             load_from_index=False,
             checkpoint=checkpoint,
         )
-        instance.index(collection, index_name=name, bsize=10)
+        instance.index(collection, index_name=name, bsize=32)
         return instance
 
     @classmethod
