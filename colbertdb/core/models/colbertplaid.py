@@ -63,7 +63,7 @@ class ColbertPLAID:
         index_name: Optional[str] = None,
         store_name: Optional[str] = None,
         load_from_index: bool = False,
-        checkpoint: Union[str, Path] = ".checkpoints/colbertv2.0",
+        checkpoint: Union[str, Path] = ".data/.checkpoints/colbertv2.0",
     ):
         self.collection = None
         self.pid_docid_map = None

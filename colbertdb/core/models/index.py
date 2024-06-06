@@ -135,8 +135,7 @@ class PLAIDModelIndex:
         else:
             self.config.kmeans_niters = 20
 
-        print("Using pytorch kmeans for clustering")
-        CollectionIndexer._train_kmeans = self.pytorch_kmeans
+        print("Using faiss for clustering")
 
         with Run().context(RunConfig(experiment=store_name)):
             indexer = Indexer(

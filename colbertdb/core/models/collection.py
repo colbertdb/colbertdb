@@ -30,7 +30,7 @@ class Collection:
         collection: List[Document],
         name: str,
         store_name: Optional[str] = "default",
-        checkpoint: Union[str, Path] = ".checkpoints/colbertv2.0",
+        checkpoint: Union[str, Path] = ".data/.checkpoints/colbertv2.0",
     ) -> "Collection":
         """Load a ColBERT model from a pre-trained checkpoint.
 
@@ -50,7 +50,7 @@ class Collection:
             load_from_index=False,
             checkpoint=checkpoint,
         )
-        instance.index(collection, index_name=name)
+        instance.index(collection, index_name=name, bsize=32)
         return instance
 
     @classmethod
